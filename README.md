@@ -1,3 +1,5 @@
+![Funded by Next Gen EU](image.png)
+
 # bio-agent-benchmark
 
 Benchmark for evaluating LLM agents in bioinformatics
