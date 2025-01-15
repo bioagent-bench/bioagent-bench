@@ -1,0 +1,6 @@
+.python-version
+data
+.venv
+uv.lock
+.ipynb_checkpoints
+*.DS_Store
