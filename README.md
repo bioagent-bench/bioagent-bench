@@ -43,6 +43,9 @@ Requirements:
  ./scan/scripts/fastqc.sh
 ```
 
+Before running the actual scan 10 pipeline. You should edit nextflow config files to reflect your system
+located in scan10/src/nextflow.config
+
 ```bash
  ./scan/scripts/run_scan10.sh
 ```
