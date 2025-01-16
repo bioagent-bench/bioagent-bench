@@ -4,3 +4,11 @@ data
 uv.lock
 .ipynb_checkpoints
 *.DS_Store
+.scan
+fastp.html
+
+# Ignore files in scripts folder with a whitelist
+scan/scripts/*
+!scan/scripts/fastqc.sh
+!scan/scripts/run_scan10.sh
+!scan/scripts/fast_dump.sh
