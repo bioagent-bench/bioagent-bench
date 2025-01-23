@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - emboss =6.6.0
+  - hmmer =3.2.1
+  - biopython=1.80

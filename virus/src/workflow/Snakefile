@@ -1,0 +1,99 @@
+# ------------------------------ Config parsing------------------------- #
+configfile: "config/config.yaml"
+
+# ------------------------------ Include Snakefiles ------------------------- #
+include: "rules/common.smk"
+include: "rules/1_fastp.smk"
+include: "rules/2_assembly.smk"
+include: "rules/3_length_filtering.smk"
+include: "rules/4_minimap.smk"
+include: "rules/5_wtp.smk"
+include: "rules/6_hmmsearch.smk"
+include: "rules/7_cat.smk"
+include: "rules/8_bwa.smk"
+
+# ------------------------------ Targets ------------------------------------ #
+samples_df = samplesheet_to_df(config['samplesheet'])
+
+FRACTIONS = samples_df['fraction'].unique().tolist()
+VIRAL_SAMPLES = samples_df.loc[samples_df.fraction == 'viral', 'sample_id'].values.tolist()
+MICROBIAL_SAMPLES = samples_df.loc[samples_df.fraction == 'microbial', 'sample_id'].values.tolist()
+ALL_SAMPLES = VIRAL_SAMPLES + MICROBIAL_SAMPLES
+LENGTH = str(config['SEQTK']['length'])
+
+rule all:
+    input:
+        # FASTP output
+        expand("results/{fraction}/{sample}/qc/{sample}.fastp.html",
+               fraction=['viral'], sample=VIRAL_SAMPLES),
+        expand("results/{fraction}/{sample}/qc/{sample}.fastp.html",
+               fraction=['microbial'], sample=MICROBIAL_SAMPLES),
+        # METASPADES assembly output
+        expand("results/{fraction}/{sample}/assembly/scaffolds.fasta",
+                fraction=['viral'], sample=VIRAL_SAMPLES),
+        expand("results/{fraction}/{sample}/assembly/scaffolds.fasta",
+                fraction=['microbial'], sample=MICROBIAL_SAMPLES),
+        # SCAFFOLDS post-assembly output
+        expand("results/{fraction}/{sample}/scaffolds/{sample}_scaffolds.fasta",
+                fraction=['viral'], sample=VIRAL_SAMPLES),
+        expand("results/{fraction}/{sample}/scaffolds/{sample}_scaffolds.fasta",
+                fraction=['microbial'], sample=MICROBIAL_SAMPLES),
+        # LENGTH FILTERING output
+        expand("results/{fraction}/{sample}/scaffolds/{sample}_scaffolds_gt{length}.fasta",
+                fraction=['viral'], sample=VIRAL_SAMPLES, length=LENGTH),
+        expand("results/{fraction}/{sample}/scaffolds/{sample}_scaffolds_gt{length}.fasta",
+                fraction=['microbial'], sample=MICROBIAL_SAMPLES, length=LENGTH),
+        # CONCATENATE output
+        expand("results/{fraction}/concatenated_scaffolds/{fraction}_scaffolds_gt" + LENGTH + ".fasta", 
+               fraction=FRACTIONS),
+        # MINIMAP output
+        "results/minimap/viral_to_microbial_minimap.paf",
+        "results/minimap/viral_query.csv",
+        "results/minimap/microbial_target.csv",
+        "results/minimap/minimap_out.csv",
+        # WTP output (What-the-Phage results)
+        expand("results/wtp/output/{sample}_scaffolds_gt{length}/{sample}_scaffolds_gt{length}_quality_summary.tsv",
+                sample=ALL_SAMPLES, length=LENGTH),
+        # TRANSEQ output: translated contigs for HMM search
+        expand("results/{fraction}/concatenated_scaffolds/unique_{fraction}_contigs.fasta",
+                fraction=['viral']),
+        expand("results/{fraction}/concatenated_scaffolds/unique_{fraction}_contigs.fasta",
+                fraction=['microbial']),
+        # HMM output files
+        expand("results/{fraction}/hmmsearch/{fraction}_viralhmm_hmmsearch_table.out",
+                fraction=['viral']),
+        expand("results/{fraction}/hmmsearch/{fraction}_viralhmm_hmmsearch_table.out",
+                fraction=['microbial']),
+        expand("results/{fraction}/hmmsearch/{fraction}_microbialhmm_hmmsearch_table.out",
+                fraction=['viral']),
+        expand("results/{fraction}/hmmsearch/{fraction}_microbialhmm_hmmsearch_table.out",
+                fraction=['microbial']),
+        # HMM dataframe output (final merged hit length results)
+        expand("results/{fraction}/hmmsearch/{fraction}_viralhmm_hmmsearch_merged_hit_length.pkl",
+                fraction=['viral']),
+        expand("results/{fraction}/hmmsearch/{fraction}_viralhmm_hmmsearch_merged_hit_length.pkl",
+                fraction=['microbial']),
+        expand("results/{fraction}/hmmsearch/{fraction}_microbialhmm_hmmsearch_merged_hit_length.pkl",
+                fraction=['viral']),
+        expand("results/{fraction}/hmmsearch/{fraction}_microbialhmm_hmmsearch_merged_hit_length.pkl",
+                fraction=['microbial']),
+        # CAT output files
+        expand("results/{fraction}/cat/{fraction}_scaffolds_gt{length}.contig2classification.txt", 
+               fraction=FRACTIONS, length=LENGTH),
+        expand("results/{fraction}/cat/{fraction}_scaffolds_gt{length}_cat_taxonomy_official.txt",
+               fraction=FRACTIONS, length=LENGTH),
+        expand("results/{fraction}/cat/{fraction}_scaffolds_gt{length}_cat_summarise.txt",
+               fraction=FRACTIONS, length=LENGTH),
+        # bwa mapping outputs and stats
+        expand("results/{fraction}/{sample}/scaffolds/{sample}_scaffolds_gt{length}.fasta.amb",
+               fraction=['microbial'], sample=MICROBIAL_SAMPLES, length=LENGTH),
+        expand("results/{fraction}/{sample}/scaffolds/{sample}_scaffolds_gt{length}.fasta.amb",
+               fraction=['viral'], sample=VIRAL_SAMPLES, length=LENGTH),
+        expand("results/{fraction}/{sample}/bwa/{sample}.bam",
+               fraction=['microbial'], sample=MICROBIAL_SAMPLES),
+        expand("results/{fraction}/{sample}/bwa/{sample}.bam",
+               fraction=['viral'], sample=VIRAL_SAMPLES),
+        expand("results/{fraction}/{sample}/bwa/{sample}.samtools_stats.txt",
+               fraction=['microbial'], sample=MICROBIAL_SAMPLES),
+        expand("results/{fraction}/{sample}/bwa/{sample}.samtools_stats.txt",
+               fraction=['viral'], sample=VIRAL_SAMPLES)

@@ -51,3 +51,7 @@ located in scan10/src/nextflow.config
 ```
 
 ## Virus identification
+Download the soil paired sequences
+```bash
+prefetch SRX10854940 SRX10854939 SRX10854938 SRX10854937 SRX10854936 SRX10854935 SRX10854934 SRX10854933
+```
