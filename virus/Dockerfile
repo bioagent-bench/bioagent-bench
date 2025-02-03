@@ -1,10 +1,14 @@
 FROM condaforge/mambaforge:latest
 
 WORKDIR /pipeline
+
+COPY /src /pipeline/src
+RUN conda env create -f /pipeline/src/environment.yaml -n virus
+
 COPY . /pipeline
 
-RUN mamba env create -f /pipeline/environment.yaml
-ENV PATH /opt/conda/envs/$(head -1 environment.yaml | cut -d' ' -f2)/bin:$PATH
+SHELL ["/bin/bash", "-c"]
 
-ENTRYPOINT ["snakemake"]
-CMD ["--help"] 
+RUN echo "conda activate virus" >> ~/.bashrc
+
+CMD ["sleep", "infinity"] 

@@ -29,29 +29,21 @@ Requirements
  sudo apt-get install parallel
  ```   
 
-1. 10x single cell
-Requirements:
- a) docker
- b) java
- c) git
-
-```bash
-./scan/scripts/fast_dump.sh
-```
-
-```bash
- ./scan/scripts/fastqc.sh
-```
-
-Before running the actual scan 10 pipeline. You should edit nextflow config files to reflect your system
-located in scan10/src/nextflow.config
-
-```bash
- ./scan/scripts/run_scan10.sh
-```
-
 ## Virus identification
-Download the soil paired sequences
+1. Download the soil paired sequences
 ```bash
-prefetch SRX10854940 SRX10854939 SRX10854938 SRX10854937 SRX10854936 SRX10854935 SRX10854934 SRX10854933
+prefetch.sh
 ```
+
+2. Run the preprocessing scripts
+```bash
+fastdump.sh
+```
+
+3. (Optional) Calculate checksums for the sequences - This is used to create an already supplied input file
+```bash
+md5sum.sh
+```
+
+
+
