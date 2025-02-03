@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DATA_PATH="/home/dev/benchmark/bio-agent-benchmark/virus/data"
-OUTPUT_PATH="/home/dev/benchmark/bio-agent-benchmark/virus/data/fastq_output"
+DATA_PATH="../data"
+OUTPUT_PATH="../data/fastq_output"
 mkdir -p "$OUTPUT_PATH"
 
 for sra_file in "$DATA_PATH"/SRR*/*.sra; do
