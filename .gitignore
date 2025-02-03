@@ -6,6 +6,7 @@ uv.lock
 *.DS_Store
 .scan
 fastp.html
+main_data/*
 
 # Ignore files in scripts folder with a whitelist
 scan/scripts/*
