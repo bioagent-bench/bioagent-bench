@@ -29,21 +29,5 @@ Requirements
  sudo apt-get install parallel
  ```   
 
-## Virus identification
-1. Download the soil paired sequences
-```bash
-prefetch.sh
-```
-
-2. Run the preprocessing scripts
-```bash
-fastdump.sh
-```
-
-3. (Optional) Calculate checksums for the sequences - This is used to create an already supplied input file
-```bash
-md5sum.sh
-```
-
-
+## Experimental evolution
 
