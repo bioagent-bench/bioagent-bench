@@ -30,4 +30,4 @@ Requirements
  ```   
 
 ## Experimental evolution
-
+* There is no need to remove PhiX sequences and perform adapter trimming for Illumina

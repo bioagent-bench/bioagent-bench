@@ -1,15 +1,7 @@
 .python-version
-data
-.venv
 uv.lock
-.ipynb_checkpoints
 *.DS_Store
-.scan
-fastp.html
-main_data/*
 
-# Ignore files in scripts folder with a whitelist
-scan/scripts/*
-!scan/scripts/fastqc.sh
-!scan/scripts/run_scan10.sh
-!scan/scripts/fast_dump.sh
+evolution/analysis/trimmed/*
+evolution/analysis/data.tar.gz
+evolution/analysis/data/*
