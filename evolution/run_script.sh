@@ -18,3 +18,10 @@ fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_r
  fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_right --thread 60 \
  --html trimmed/evol2.fastp.html --json trimmed/evol2.fastp.json -i data/evol2_R1.fastq.gz \
  -I data/evol2_R2.fastq.gz -o trimmed/evol2_R1.fastq.gz -O trimmed/evo2_R2.fastq.gz
+
+ # run fastqc
+ fastqc -o trimmed-fastqc trimmed/*.fastq.gz
+
+ # (optional - visualization) visualize the results using multiqc
+ # !you need to install multiqc
+ multiqc trimmed-fastqc trimmed

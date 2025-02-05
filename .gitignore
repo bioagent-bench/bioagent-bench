@@ -2,6 +2,5 @@
 uv.lock
 *.DS_Store
 
-evolution/analysis/trimmed/*
-evolution/analysis/data.tar.gz
-evolution/analysis/data/*
+evolution/*
+!evolution/run_script.sh
