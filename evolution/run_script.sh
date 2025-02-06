@@ -6,6 +6,7 @@ cd analysis
 wget -O data.tar.gz https://osf.io/2jc4a/download
 tar -xvzf data.tar.gz
 
+# QUALITY CONTROL
 # trim the adapters
 fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_right --thread 60 \
  --html trimmed/anc.fastp.html --json trimmed/anc.fastp.json -i data/anc_R1.fastq.gz \
@@ -25,3 +26,11 @@ fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_r
  # (optional - visualization) visualize the results using multiqc
  # !you need to install multiqc
  multiqc trimmed-fastqc trimmed
+
+ # GENOME ASSEMBLY
+ mkdir assembly
+ spades.py -o assembly/spades-150/ --careful -1 trimmed/anc_R1.fastq.gz -2 trimmed/anc_R2.fastq.gz
+ spades.py -o assembly/spades-original/ --careful -1 data/anc_R1.fastq.gz -2 data/anc_R2.fastq.gz
+
+ quast -o assembl/quast assembly/spades-150/scaffolds.fasta assembly/spades-original/scaffolds.fasta
+
