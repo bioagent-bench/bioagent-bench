@@ -5,7 +5,7 @@ conda create -n fastp_env -c bioconda fastp -y
 conda create -n fastqc_env -c bioconda fastqc -y
 conda create -n multiqc_env -c bioconda multiqc -y
 conda create -n spades_env -c bioconda spades -y
-conda create -n quast_env -c bioconda quast -y
+conda create -n quast_env
 
 # create the folders and download the data
 mkdir analysis
@@ -47,5 +47,10 @@ fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_r
  spades.py -o assembly/spades-150/ --careful -1 trimmed/anc_R1.fastq.gz -2 trimmed/anc_R2.fastq.gz
  spades.py -o assembly/spades-original/ --careful -1 data/anc_R1.fastq.gz -2 data/anc_R2.fastq.gz
 
- quast -o assembl/quast assembly/spades-150/scaffolds.fasta assembly/spades-original/scaffolds.fasta
+# Check the assembly quality
+# Programing gods forgive this black magic
+ conda activate quast_env
+ conda install pip
+ pip install quast
+ quast -o assembly/quast assembly/spades-150/scaffolds.fasta assembly/spades-original/scaffolds.fasta
 
