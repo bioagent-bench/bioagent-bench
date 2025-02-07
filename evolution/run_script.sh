@@ -6,6 +6,9 @@ cd analysis
 wget -O data.tar.gz https://osf.io/2jc4a/download
 tar -xvzf data.tar.gz
 
+# let conda solve the whole environment
+conda env create -f ../environment.yml
+
 # QUALITY CONTROL
 # trim the adapters
 fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_right --thread 60 \
