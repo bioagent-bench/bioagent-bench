@@ -1,11 +1,13 @@
 #!/bin/bash
 
 # Create individual environments for each tool
+# Sometimes these environments get spastic and this is easier
 conda create -n fastp_env -c bioconda fastp -y
 conda create -n fastqc_env -c bioconda fastqc -y
 conda create -n multiqc_env -c bioconda multiqc -y
 conda create -n spades_env -c bioconda spades -y
 conda create -n quast_env
+conda create -y -n mapping_env samtools bwa qualimap r-base
 
 # create the folders and download the data
 mkdir analysis
@@ -35,7 +37,6 @@ fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_r
  conda activate fastqc_env
  fastqc -o trimmed-fastqc trimmed/*.fastq.gz
 
-
  # (optional - visualization) visualize the results using multiqc
  # !you need to install multiqc
  conda activate multiqc_env
@@ -51,6 +52,11 @@ fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_r
 # Programing gods forgive this black magic
  conda activate quast_env
  conda install pip
+ pip install setuptools
  pip install quast
  quast -o assembly/quast assembly/spades-150/scaffolds.fasta assembly/spades-original/scaffolds.fasta
 
+# READ MAPPING
+conda create -y -n mapping_env samtools bwa qualimap r-base
+conda activate mapping_env
+mkdir mappings
