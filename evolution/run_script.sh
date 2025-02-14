@@ -98,3 +98,17 @@ rm mappings/evol2.fixmate.bam
 rm mappings/evol2.sorted.bam
 rm mappings/evol2.sorted.dedup.bam
 rm mappings/evol2.sorted.unmapped.bam
+
+# TAXONOMIC CLASSIFICATION
+$ conda create -y -n kraken_env kraken2 bracken
+$ conda activate kraken_env
+mkdir kraken-db
+wget -O kraken-db/k2_standard_16gb_20241228.tar.gz https://genome-idx.s3.amazonaws.com/kraken/k2_standard_16gb_20241228.tar.gz
+kraken2 --use-names --threads 32 --db kraken-db/ --fastq-input --report evol1 --gzip-compressed --paired mappings/evol1.sorted.unmapped.R1.fastq.gz mappings/evol1.sorted.unmapped.R2.fastq.gz > evol1.kraken
+bracken -d kraken-db -i evol1.kraken -l S -o evol1.bracken
+
+# VARIANT CALLING
+conda create -y -n variant_env samtools bamtools freebayes bedtools vcflib rtg-tools bcftools matplotlib
+mkdir variants
+samtools faidx assembly/scaffolds.fasta
+bamtools index -in mappings/evol1.sorted.dedup.q20.bam
