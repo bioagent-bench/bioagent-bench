@@ -31,7 +31,7 @@ fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_r
 
  fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_right --thread 60 \
  --html trimmed/evol2.fastp.html --json trimmed/evol2.fastp.json -i data/evol2_R1.fastq.gz \
- -I data/evol2_R2.fastq.gz -o trimmed/evol2_R1.fastq.gz -O trimmed/evo2_R2.fastq.gz
+ -I data/evol2_R2.fastq.gz -o trimmed/evol2_R1.fastq.gz -O trimmed/evol2_R2.fastq.gz
 
  # run fastqc
  conda activate fastqc_env
@@ -60,3 +60,41 @@ fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_r
 conda create -y -n mapping_env samtools bwa qualimap r-base
 conda activate mapping_env
 mkdir mappings
+cp assembly/spades-150/scaffolds.fasta mappings/scaffolds.fasta
+bwa index mappings/scaffolds.fasta
+bwa mem mappings/scaffolds.fasta trimmed/evol1_R1.fastq.gz trimmed/evol1_R2.fastq.gz > mappings/evol1.sam
+bwa mem mappings/scaffolds.fasta trimmed/evol2_R1.fastq.gz trimmed/evol2_R2.fastq.gz > mappings/evol2.sam
+
+# POST PROCESS MAPPING
+# Evol1 line
+samtools sort -n -O sam mappings/evol1.sam | samtools fixmate -m -O bam - mappings/evol1.fixmate.bam
+# sort
+samtools sort -O bam -o mappings/evol1.sorted.bam mappings/evol1.fixmate.bam
+# mark duplicates
+samtools markdup -r -S mappings/evol1.sorted.bam mappings/evol1.sorted.dedup.bam
+# extract q20 mappers
+samtools view -h -b -q 20 mappings/evol1.sorted.dedup.bam > mappings/evol1.sorted.dedup.q20.bam
+# extract unmapped
+samtools view -b -f 4 mappings/evol1.sorted.dedup.bam > mappings/evol1.sorted.unmapped.bam
+# covert to fastq
+samtools fastq -1 mappings/evol1.sorted.unmapped.R1.fastq.gz -2 mappings/evol1.sorted.unmapped.R2.fastq.gz mappings/evol1.sorted.unmapped.bam
+# delete unnecessary files
+rm mappings/evol1.sam
+rm mappings/evol1.fixmate.bam
+rm mappings/evol1.sorted.bam
+rm mappings/evol1.sorted.dedup.bam
+rm mappings/evol1.sorted.unmapped.bam
+
+# Evol2 line
+samtools sort -n -O sam mappings/evol2.sam | samtools fixmate -m -O bam - mappings/evol2.fixmate.bam
+samtools sort -O bam -o mappings/evol2.sorted.bam mappings/evol2.fixmate.bam
+samtools markdup -r -S mappings/evol2.sorted.bam mappings/evol2.sorted.dedup.bam
+samtools view -h -b -q 20 mappings/evol2.sorted.dedup.bam > mappings/evol2.sorted.dedup.q20.bam
+samtools view -b -f 4 mappings/evol2.sorted.dedup.bam > mappings/evol2.sorted.unmapped.bam
+samtools fastq -1 mappings/evol2.sorted.unmapped.R1.fastq.gz -2 mappings/evol2.sorted.unmapped.R2.fastq.gz mappings/evol2.sorted.unmapped.bam
+
+rm mappings/evol2.sam
+rm mappings/evol2.fixmate.bam
+rm mappings/evol2.sorted.bam
+rm mappings/evol2.sorted.dedup.bam
+rm mappings/evol2.sorted.unmapped.bam
