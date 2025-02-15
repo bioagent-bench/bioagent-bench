@@ -112,3 +112,7 @@ conda create -y -n variant_env samtools bamtools freebayes bedtools vcflib rtg-t
 mkdir variants
 samtools faidx assembly/scaffolds.fasta
 bamtools index -in mappings/evol1.sorted.dedup.q20.bam
+freebayes -p 1 -f assembly/spades-150/scaffolds.fasta mappings/evol1.sorted.dedup.q20.bam > variants/evol1.freebayes.vcf
+bgzip variants/evol1.freebayes.vcf
+tabix -p vcf variants/evol1.freebayes.vcf.gz
+rtg vcfstats variants/evol1.freebayes.vcf.gz
