@@ -45,8 +45,7 @@ fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_r
  # GENOME ASSEMBLY
  conda activate spades_env
  mkdir assembly
- spades.py -o assembly/spades-150/ --careful -1 trimmed/anc_R1.fastq.gz -2 trimmed/anc_R2.fastq.gz
- spades.py -o assembly/spades-original/ --careful -1 data/anc_R1.fastq.gz -2 data/anc_R2.fastq.gz
+ spades.py -o assembly --careful -1 trimmed/anc_R1.fastq.gz -2 trimmed/anc_R2.fastq.gz
 
 # Check the assembly quality
 # Programing gods forgive this black magic
@@ -54,13 +53,13 @@ fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_r
  conda install pip
  pip install setuptools
  pip install quast
- quast -o assembly/quast assembly/spades-150/scaffolds.fasta assembly/spades-original/scaffolds.fasta
+ quast -o assembly/quast assembly/scaffolds.fasta assembly/spades-original/scaffolds.fasta
 
 # READ MAPPING
 conda create -y -n mapping_env samtools bwa qualimap r-base
 conda activate mapping_env
 mkdir mappings
-cp assembly/spades-150/scaffolds.fasta mappings/scaffolds.fasta
+cp assembly/scaffolds.fasta mappings/scaffolds.fasta
 bwa index mappings/scaffolds.fasta
 bwa mem mappings/scaffolds.fasta trimmed/evol1_R1.fastq.gz trimmed/evol1_R2.fastq.gz > mappings/evol1.sam
 bwa mem mappings/scaffolds.fasta trimmed/evol2_R1.fastq.gz trimmed/evol2_R2.fastq.gz > mappings/evol2.sam
@@ -68,24 +67,17 @@ bwa mem mappings/scaffolds.fasta trimmed/evol2_R1.fastq.gz trimmed/evol2_R2.fast
 # POST PROCESS MAPPING
 # Evol1 line
 samtools sort -n -O sam mappings/evol1.sam | samtools fixmate -m -O bam - mappings/evol1.fixmate.bam
-# sort
 samtools sort -O bam -o mappings/evol1.sorted.bam mappings/evol1.fixmate.bam
-# mark duplicates
 samtools markdup -r -S mappings/evol1.sorted.bam mappings/evol1.sorted.dedup.bam
-# extract q20 mappers
 samtools view -h -b -q 20 mappings/evol1.sorted.dedup.bam > mappings/evol1.sorted.dedup.q20.bam
-# extract unmapped
 samtools view -b -f 4 mappings/evol1.sorted.dedup.bam > mappings/evol1.sorted.unmapped.bam
-# covert to fastq
 samtools fastq -1 mappings/evol1.sorted.unmapped.R1.fastq.gz -2 mappings/evol1.sorted.unmapped.R2.fastq.gz mappings/evol1.sorted.unmapped.bam
-# delete unnecessary files
 rm mappings/evol1.sam
 rm mappings/evol1.fixmate.bam
 rm mappings/evol1.sorted.bam
 rm mappings/evol1.sorted.dedup.bam
 rm mappings/evol1.sorted.unmapped.bam
 
-# Evol2 line
 samtools sort -n -O sam mappings/evol2.sam | samtools fixmate -m -O bam - mappings/evol2.fixmate.bam
 samtools sort -O bam -o mappings/evol2.sorted.bam mappings/evol2.fixmate.bam
 samtools markdup -r -S mappings/evol2.sorted.bam mappings/evol2.sorted.dedup.bam
@@ -99,20 +91,27 @@ rm mappings/evol2.sorted.bam
 rm mappings/evol2.sorted.dedup.bam
 rm mappings/evol2.sorted.unmapped.bam
 
-# TAXONOMIC CLASSIFICATION
-$ conda create -y -n kraken_env kraken2 bracken
-$ conda activate kraken_env
-mkdir kraken-db
-wget -O kraken-db/k2_standard_16gb_20241228.tar.gz https://genome-idx.s3.amazonaws.com/kraken/k2_standard_16gb_20241228.tar.gz
-kraken2 --use-names --threads 32 --db kraken-db/ --fastq-input --report evol1 --gzip-compressed --paired mappings/evol1.sorted.unmapped.R1.fastq.gz mappings/evol1.sorted.unmapped.R2.fastq.gz > evol1.kraken
-bracken -d kraken-db -i evol1.kraken -l S -o evol1.bracken
-
 # VARIANT CALLING
 conda create -y -n variant_env samtools bamtools freebayes bedtools vcflib rtg-tools bcftools matplotlib
+conda activate variant_env
 mkdir variants
 samtools faidx assembly/scaffolds.fasta
 bamtools index -in mappings/evol1.sorted.dedup.q20.bam
-freebayes -p 1 -f assembly/spades-150/scaffolds.fasta mappings/evol1.sorted.dedup.q20.bam > variants/evol1.freebayes.vcf
+
+# evol 1
+freebayes -p 1 -f assembly/scaffolds.fasta mappings/evol1.sorted.dedup.q20.bam > variants/evol1.freebayes.vcf
 bgzip variants/evol1.freebayes.vcf
 tabix -p vcf variants/evol1.freebayes.vcf.gz
-rtg vcfstats variants/evol1.freebayes.vcf.gz
+zcat variants/evol1.freebayes.vcf.gz | vcffilter -f "QUAL > 1 & QUAL / AO > 10 & SAF > 0 & SAR > 0 & RPR > 1 & RPL > 1" | bgzip > variants/evol1.freebayes.filtered.vcf.gz
+tabix -p vcf variants/evol1.freebayes.filtered.vcf.gz
+
+# evol 2
+bamtools index -in mappings/evol2.sorted.dedup.q20.bam
+freebayes -p 1 -f assembly/scaffolds.fasta mappings/evol2.sorted.dedup.q20.bam > variants/evol2.freebayes.vcf
+bgzip variants/evol2.freebayes.vcf
+tabix -p vcf variants/evol2.freebayes.vcf.gz
+zcat variants/evol2.freebayes.vcf.gz | vcffilter -f "QUAL > 1 & QUAL / AO > 10 & SAF > 0 & SAR > 0 & RPR > 1 & RPL > 1" | bgzip > variants/evol2.freebayes.filtered.vcf.gz
+tabix -p vcf variants/evol2.freebayes.filtered.vcf.gz
+
+# GENOME ANNOTATION
+conda create -y -n compleasm_env -c conda-forge -c bioconda compleasm
