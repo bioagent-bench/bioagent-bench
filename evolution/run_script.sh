@@ -2,10 +2,10 @@
 
 # Create individual environments for each tool
 # Sometimes these environments get spastic and this is easier
-conda create -n fastp_env -c bioconda fastp -y
-conda create -n fastqc_env -c bioconda fastqc -y
-conda create -n multiqc_env -c bioconda multiqc -y
-conda create -n spades_env -c bioconda spades -y
+conda create -n fastp_env bioconda::fastp -y
+conda create -n fastqc_env bioconda::fastqc -y
+conda create -n multiqc_env bioconda::multiqc -y
+conda create -n spades_env bioconda::spades -y
 conda create -n quast_env
 conda create -y -n mapping_env samtools bwa qualimap r-base
 
@@ -14,9 +14,6 @@ mkdir analysis
 cd analysis
 wget -O data.tar.gz https://osf.io/2jc4a/download
 tar -xvzf data.tar.gz
-
-# let conda solve the whole environment
-conda env create -f ../environment.yml
 
 # QUALITY CONTROL
 # trim the adapters
@@ -114,4 +111,39 @@ zcat variants/evol2.freebayes.vcf.gz | vcffilter -f "QUAL > 1 & QUAL / AO > 10 &
 tabix -p vcf variants/evol2.freebayes.filtered.vcf.gz
 
 # GENOME ANNOTATION
-conda create -y -n compleasm_env -c conda-forge -c bioconda compleasm
+conda create -y -n compleasm_env bioconda::compleasm
+conda activate compleasm_env
+compleasm run -a assembly/scaffolds.fasta -o annotation -l bacteria_odb10 -m busco -t 64
+
+mamba create -y -n prokka_env bioconda::prokka
+prokka --kingdom Bacteria --genus Escherichia --species coli --outdir annotation/prokka assembly/spades-150/scaffolds.fasta
+
+mamba create -n voi_env -c bioconda snpeff genometools-genometools bedtools
+mamba activate voi_env
+mkdir -p voi/data/mygenome
+cp assembly/scaffolds.fasta voi/data/mygenome/sequences.fa
+gzip voi/data/mygenome/sequences.fa
+cp annotation/prokka/*.gff voi/data/mygenome/genes.gff
+gzip voi/data/mygenome/genes.gff
+
+SNPEFF_CONFIG=$(find ~ -name snpEff.config | head -n 1)
+cp "$SNPEFF_CONFIG" voi/snpEff.config
+sed -i 's|^data.dir.*|data.dir = data/|' voi/snpEff.config
+
+awk '/# Databases & Genomes/ {print; in_section=1; next} 
+     in_section && /^#[-]+$/ {print; print "mygenome.genome : EColiMut"; in_section=0; next} 
+     {print}' voi/snpEff.config > voi/snpEff.config.tmp && mv voi/snpEff.config.tmp voi/snpEff.config
+
+awk '!seen["mygenome.codonTable"] && !seen["mygenome.checkProtein"] && !seen["mygenome.checkCds"] {print} 
+     /# Databases & Genomes/ {seen["mygenome.codonTable"]=1; seen["mygenome.checkProtein"]=1; seen["mygenome.checkCds"]=1} 
+     END {print "\nmygenome.codonTable : Bacterial\nmygenome.checkProtein : false\nmygenome.checkCds : false"}' \
+     voi/snpEff.config > voi/snpEff.config.tmp && mv voi/snpEff.config.tmp voi/snpEff.config
+
+
+snpEff build -c voi/snpEff.config -gff3 -v mygenome -noCheckCds -noCheckProtein
+
+gunzip -k variants/evol1.freebayes.filtered.vcf.gz
+snpEff -c voi/snpEff.config mygenome variants/evol1.freebayes.filtered.vcf > evol1.freebayes.filtered.anno.vcf
+
+gunzip -k variants/evol2.freebayes.filtered.vcf.gz
+snpEff -c voi/snpEff.config -Xmx8g mygenome variants/evol2.freebayes.filtered.vcf > evol2.freebayes.filtered.anno.vcf
