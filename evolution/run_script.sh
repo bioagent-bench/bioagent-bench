@@ -2,12 +2,16 @@
 
 # Create individual environments for each tool
 # Sometimes these environments get spastic and this is easier
-conda create -n fastp_env bioconda::fastp -y
-conda create -n fastqc_env bioconda::fastqc -y
-conda create -n multiqc_env bioconda::multiqc -y
-conda create -n spades_env bioconda::spades -y
-conda create -n quast_env
-conda create -y -n mapping_env samtools bwa qualimap r-base
+mamba create -n fastp_env bioconda::fastp -y
+mamba create -n fastqc_env bioconda::fastqc -y
+mamba create -n multiqc_env bioconda::multiqc -y
+mamba create -n spades_env bioconda::spades -y
+mamba create -n quast_env
+mamba create -y -n mapping_env samtools bwa qualimap r-base
+mamba create -y -n variant_env samtools bamtools freebayes bedtools vcflib rtg-tools bcftools matplotlib
+mamba create -y -n compleasm_env bioconda::compleasm
+mamba create -y -n prokka_env bioconda::prokka
+mamba create -n voi_env -c bioconda snpeff genometools-genometools bedtools
 
 # create the folders and download the data
 mkdir analysis
@@ -17,7 +21,7 @@ tar -xvzf data.tar.gz
 
 # QUALITY CONTROL
 # trim the adapters
-conda activate fastp_env
+mamba activate fastp_env
 fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_right --thread 60 \
  --html trimmed/anc.fastp.html --json trimmed/anc.fastp.json -i data/anc_R1.fastq.gz \
  -I data/anc_R2.fastq.gz -o trimmed/anc_R1.fastq.gz -O trimmed/anc_R2.fastq.gz
@@ -31,30 +35,29 @@ fastp --detect_adapter_for_pe --overrepresentation_analysis --correction --cut_r
  -I data/evol2_R2.fastq.gz -o trimmed/evol2_R1.fastq.gz -O trimmed/evol2_R2.fastq.gz
 
  # run fastqc
- conda activate fastqc_env
+ mamba activate fastqc_env
  fastqc -o trimmed-fastqc trimmed/*.fastq.gz
 
  # (optional - visualization) visualize the results using multiqc
  # !you need to install multiqc
- conda activate multiqc_env
+ mamba activate multiqc_env
  multiqc trimmed-fastqc trimmed
 
  # GENOME ASSEMBLY
- conda activate spades_env
+ mamba activate spades_env
  mkdir assembly
  spades.py -o assembly --careful -1 trimmed/anc_R1.fastq.gz -2 trimmed/anc_R2.fastq.gz
 
 # Check the assembly quality
 # Programing gods forgive this black magic
- conda activate quast_env
- conda install pip
+ mamba activate quast_env
+ mamba install pip
  pip install setuptools
  pip install quast
  quast -o assembly/quast assembly/scaffolds.fasta assembly/spades-original/scaffolds.fasta
 
 # READ MAPPING
-conda create -y -n mapping_env samtools bwa qualimap r-base
-conda activate mapping_env
+mamba activate mapping_env
 mkdir mappings
 cp assembly/scaffolds.fasta mappings/scaffolds.fasta
 bwa index mappings/scaffolds.fasta
@@ -89,8 +92,7 @@ rm mappings/evol2.sorted.dedup.bam
 rm mappings/evol2.sorted.unmapped.bam
 
 # VARIANT CALLING
-conda create -y -n variant_env samtools bamtools freebayes bedtools vcflib rtg-tools bcftools matplotlib
-conda activate variant_env
+mamba activate variant_env
 mkdir variants
 samtools faidx assembly/scaffolds.fasta
 bamtools index -in mappings/evol1.sorted.dedup.q20.bam
@@ -111,14 +113,12 @@ zcat variants/evol2.freebayes.vcf.gz | vcffilter -f "QUAL > 1 & QUAL / AO > 10 &
 tabix -p vcf variants/evol2.freebayes.filtered.vcf.gz
 
 # GENOME ANNOTATION
-conda create -y -n compleasm_env bioconda::compleasm
-conda activate compleasm_env
+mamba activate compleasm_env
 compleasm run -a assembly/scaffolds.fasta -o annotation -l bacteria_odb10 -m busco -t 64
 
-mamba create -y -n prokka_env bioconda::prokka
+mamba activate prokka_env
 prokka --kingdom Bacteria --genus Escherichia --species coli --outdir annotation/prokka assembly/spades-150/scaffolds.fasta
 
-mamba create -n voi_env -c bioconda snpeff genometools-genometools bedtools
 mamba activate voi_env
 mkdir -p voi/data/mygenome
 cp assembly/scaffolds.fasta voi/data/mygenome/sequences.fa
