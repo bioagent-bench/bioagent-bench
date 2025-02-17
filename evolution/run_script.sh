@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Create individual environments for each tool
 # Sometimes these environments get spastic and this is easier
