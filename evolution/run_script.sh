@@ -8,8 +8,8 @@ mamba create -n fastqc_env bioconda::fastqc -y
 mamba create -n multiqc_env bioconda::multiqc -y
 mamba create -n spades_env bioconda::spades -y
 mamba create -n quast_env
-mamba create -y -n mapping_env samtools bwa qualimap r-base
-mamba create -y -n variant_env samtools bamtools freebayes bedtools vcflib rtg-tools bcftools matplotlib
+mamba create -y -n mapping_env -c bioconda samtools bwa qualimap r-base
+mamba create -y -n variant_env -c bioconda samtools bamtools freebayes bedtools vcflib rtg-tools bcftools matplotlib
 mamba create -y -n compleasm_env bioconda::compleasm
 mamba create -y -n prokka_env bioconda::prokka
 mamba create -n voi_env -c bioconda snpeff genometools-genometools bedtools
