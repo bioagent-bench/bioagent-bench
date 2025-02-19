@@ -4,3 +4,7 @@ uv.lock
 
 evolution/*
 !evolution/run_script.sh
+
+fibrosis/*
+!fibrosis/run_script.sh
+!fibrosis/family_tree_metadata.csv
