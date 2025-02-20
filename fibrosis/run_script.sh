@@ -2,8 +2,10 @@
 set -e
 
 mkdir data
-wget -O data/protocols.zip http://sourceforge.net/projects/snpeff/files/protocols.zip
-unzip data/protocols.zip -d data/
+# This is the source data from the tutorial
+# TODO: Replace this download link with a real upload folder
+wget -O data/fibrosis.tar.gz DL_LINK 
+tar -xzf data/fibrosis.tar.gz -C data/
 
 mamba create -n fibrosis_env -c bioconda snpeff snpsift
 mamba activate fibrosis_env
