@@ -8,3 +8,6 @@ evolution/*
 fibrosis/*
 !fibrosis/run_script.sh
 !fibrosis/family_tree_metadata.csv
+
+deseq/*
+!deseq/run_script.sh

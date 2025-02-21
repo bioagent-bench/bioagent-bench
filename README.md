@@ -20,3 +20,8 @@ Family tree:\
 * 2. Parents: NA12877, NA12878
 * 3. Parents of NA12877: NA12889, NA12890
 * 4. Parents of NA12878: NA12891, NA12892
+
+### RNA-Seq Differential Expression 
+https://pubmed.ncbi.nlm.nih.gov/25233198/
+#### Data background
+The dataset consists of RNA-Seq samples from Candida parapsilosis wild-type (WT) strains grown in planktonic and biofilm conditions, generated as part of a study on gene expression and biofilm formation. The samples were sequenced on the Illumina HiSeq 2000 platform. The goal of this analysis is to perform differential expression analysis using DESeq2 to identify genes that are significantly up- or down-regulated between planktonic and biofilm conditions, providing insights into biofilm-associated transcriptional changes.
