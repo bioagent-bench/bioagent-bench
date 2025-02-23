@@ -15,3 +15,5 @@ done
 mkdir 1_fastqc
 fastqc *fastq.gz -o ./fastqc_initial -t 2
 multiqc ./1_fastqc
+
+conda install bioconda::trimmomatic
