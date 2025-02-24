@@ -11,3 +11,4 @@ fibrosis/*
 
 deseq/*
 !deseq/run_script.sh
+!deseq/run_deseq.R

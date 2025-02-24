@@ -42,28 +42,38 @@ wget -O data/reference/C_parapsilosis_CDC317_current_chromosomes.fasta.gz http:/
 wget -O data/reference/C_parapsilosis_CDC317_current_features.gff http://www.candidagenome.org/download/gff/C_parapsilosis_CDC317/C_parapsilosis_CDC317_current_features.gff
 gunzip -k data/reference/C_parapsilosis_CDC317_current_chromosomes.fasta.gz
 
-mamba install -c bioconda salmon gffread
-mkdir data/processing/6_gff
-gffread -w data/processing/6_gff/transcripts.fasta \
-    -W -F -g data/reference/C_parapsilosis_CDC317_current_chromosomes.fasta \
-    data/reference/C_parapsilosis_CDC317_current_features.gff
+mamba install -c bioconda star gffread
+STAR --runThreadN 32 --runMode genomeGenerate --genomeDir data/processing/6_indexing/ \
+     --genomeFastaFiles data/reference/C_parapsilosis_CDC317_current_chromosomes.fasta \
+     --genomeSAindexNbases 10
+gffread data/reference/C_parapsilosis_CDC317_current_features.gff -T \
+        -o data/processing/6_indexing/C_parapsilosis_CDC317_current_features.gtf
 
-mkdir data/processing/7_indexing
-salmon index -t data/processing/6_gff/transcripts.fasta -i data/processing/7_indexing/cpar_index
 
-mkdir data/processing/8_mapping/quants
-
+mkdir data/processing/7_mapping
 for file in data/processing/0_fasterqdump/*_1.fastq; do
     base=$(basename "$file" _1.fastq)
-    
-    salmon quant -i data/processing/7_indexing/cpar_index/ \
-        -l A \
-        -1 data/processing/2_trimming/${base}_1P.fastq \
-        -2 data/processing/2_trimming/${base}_2P.fastq \
-        -p 32 \
-        --validateMappings \
-        -o data/processing/8_mapping/quants/${base}_quant
-done    
+    STAR --runThreadN 32 --genomeDir data/processing/6_indexing \
+        --sjdbGTFfile data/processing/6_indexing/C_parapsilosis_CDC317_current_features.gtf \
+        --readFilesIn data/processing/2_trimming/${base}_1P.fastq \
+                      data/processing/2_trimming/${base}_2P.fastq \
+        --outFileNamePrefix data/processing/7_mapping/${base}_ --outSAMtype BAM \
+        SortedByCoordinate --limitBAMsortRAM 100000000000 \
+        --quantMode GeneCounts
+done
 
-mkdir data/processing/9_multiqc_quant
-multiqc data/processing/8_mapping/quants -o data/processing_9_multiqc_quant
+multiqc data/processing/7_mapping -o data/processing/7_mapping
+
+# R scripting starts from here
+mamba install conda-forge::r-base
+mamba install -c bioconda bioconductor-deseq2 bioconductor-biocparallel bioconductor-clusterprofiler
+mamba install -c conda-forge r-ggpubr
+
+mkdir data/processing/8_deseq
+
+# download go annotations 
+mkdir data/processing/9_gorich
+wget -O data/processing/9_gorich/gene_association.cgd.gz http://www.candidagenome.org/download/go/gene_association.cgd.gz
+gunzip -k data/processing/9_gorich/gene_association.cgd.gz
+
+Rscript run_deseq.R
