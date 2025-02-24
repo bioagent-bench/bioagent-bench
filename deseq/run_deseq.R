@@ -45,18 +45,24 @@ all_go_tems<-as.data.frame(GOTERM)
 all_go_tems<-all_go_tems[!(all_go_tems$go_id %in% c("GO:0003674","GO:0008150","GO:0005575")),]
 BP_terms<-all_go_tems$go_id[all_go_tems$Ontology=="BP"]
 
-
 all_lines <- readLines("data/processing/9_gorich/gene_association.cgd")
 data_lines <- all_lines[!grepl("^!", all_lines)]
 filtered_lines <- data_lines[grepl("578454", data_lines)]
 cpar_go <- read.table(text = filtered_lines, sep = "\t", stringsAsFactors = FALSE)
-BP_universe<-cpar_go[cpar_go$V1 %in% BP_terms,]
+cpar_go$V2 <- gsub("\\|.*$", "", cpar_go$V11)
+BP_universe <- cpar_go[cpar_go$V5 %in% BP_terms, c("V5", "V2", "V9")]
+colnames(BP_universe) <- c("V1", "V2", "V3")
 
 goterms <- Term(GOTERM)
-a<-as.data.frame(goterms)
-go_names<-cbind(row.names(a),a)
+a <- as.data.frame(goterms)
+go_names <- data.frame(
+  row.names(a),
+  a$goterms,
+  stringsAsFactors = FALSE
+)
+colnames(go_names) <- c("row.names(a)", "goterms")
 
-upreg_in_biofilm <- read.table("./up_regulated_genes.txt",header = FALSE)
+upreg_in_biofilm <- read.table("data/processing/8_deseq/up_regulated_genes.txt",header = FALSE)
 upreg_in_biofilm <- as.character(upreg_in_biofilm$V1)
 
 
