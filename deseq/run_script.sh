@@ -13,7 +13,26 @@ for sra_file in data/SRR*/**.sra; do
 done 
 
 mkdir 1_fastqc
-fastqc *fastq.gz -o ./fastqc_initial -t 2
-multiqc ./1_fastqc
+fastqc data/processing/0_fasterqdump/*fastq -o data/processing/1_fastqc -t 32
+multiqc data/processing/1_fastqc -o data/processing/2_multiqc
 
-conda install bioconda::trimmomatic
+mamba install bioconda::trimmomatic
+mkdir data/processing/3_trimming
+
+for file in data/processing/0_fasterqdump/*_1.fastq; do
+    base=$(basename "$file" _1.fastq) 
+    trimmomatic PE -threads 32 \
+        data/processing/0_fasterqdump/${base}_1.fastq \
+        data/processing/0_fasterqdump/${base}_2.fastq \
+        data/processing/2_trimming/${base}_1P.fastq \
+        data/processing/2_trimming/${base}_1U.fastq \
+        data/processing/2_trimming/${base}_2P.fastq \
+        data/processing/2_trimming/${base}_2U.fastq \
+        LEADING:20 TRAILING:20 SLIDINGWINDOW:4:20 MINLEN:50
+done
+
+mkdir data/processing/4_fastqc_trimmed
+mkdir data/processing/5_multiqc_trimmed
+
+fastqc data/processing/2_trimming/*fastq -o data/processing/4_fastqc_trimmed -t 32
+multiqc data/processing/2_trimming -o data/processing/4_multiqc_trimmed
