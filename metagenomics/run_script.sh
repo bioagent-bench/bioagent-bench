@@ -7,7 +7,7 @@ unzip data/metagenomics.zip -d data/
 mamba create -n metagenomics
 mamba activate metagenomics
 
-mamba install -c bioconda fastqc
+mamba install -c bioconda fastqc multiqc
 
 mkdir -p data/processing/0_fastqc
 fastqc data/seq/*fastq.gz -o data/processing/0_fastqc -t 32
@@ -30,3 +30,37 @@ for file in data/seq/*_R1.fastq; do
         data/processing/1_trimmed/${base}_2U.fastq \
         SLIDINGWINDOW:4:20 MINLEN:35 ILLUMINACLIP:data/seq/TruSeq3-PE.fa:2:40:15
 done
+
+mkdir -p data/processing/2_fastqc
+fastqc data/processing/1_trimmed/*.fastq -o data/processing/2_fastqc -t 32
+multiqc data/processing/2_fastqc -o data/processing/2_fastqc
+
+mkdir data/processing/3_assembly
+mamba install -c bioconda spades
+
+metaspades.py -1 data/processing/1_trimmed/JC1A_1P.fastq \
+              -2 data/processing/1_trimmed/JC1A_2P.fastq \
+              -o data/processing/3_assembly/assembly_JC1A
+
+metaspades.py -1 data/processing/1_trimmed/JP4D_1P.fastq \
+              -2 data/processing/1_trimmed/JP4D_2P.fastq \
+              -o data/processing/3_assembly/assembly_JP4D
+
+# TODO: add metaquast for spades QC
+
+mamba install -c bioconda maxbin2
+mkdir data/processing/4_binning
+# this will not work as the sample size is too small but thats expected
+run_MaxBin.pl -thread 32 \
+              -contig data/processing/3_assembly/assembly_JC1A/contigs.fasta \
+              -reads data/processing/1_trimmed/JC1A_1P.fastq \
+              -reads2 data/processing/1_trimmed/JC1A_2P.fastq \
+              -out data/processing/4_binning/
+
+run_MaxBin.pl -thread 32 \
+              -contig data/processing/3_assembly/assembly_JP4D/contigs.fasta \
+              -reads data/processing/1_trimmed/JP4D_1P.fastq \
+              -reads2 data/processing/1_trimmed/JP4D_2P.fastq \
+              -out data/processing/4_binning/
+
+    
