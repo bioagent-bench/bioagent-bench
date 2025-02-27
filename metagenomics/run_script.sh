@@ -46,21 +46,36 @@ metaspades.py -1 data/processing/1_trimmed/JP4D_1P.fastq \
               -2 data/processing/1_trimmed/JP4D_2P.fastq \
               -o data/processing/3_assembly/assembly_JP4D
 
-# TODO: add metaquast for spades QC
+mamba activate metagenomics
+mamba install -c bioconda kraken2
+mkdir data/processing/4_taxonomy
+mkdir data/kraken_db
 
-mamba install -c bioconda maxbin2
-mkdir data/processing/4_binning
-# this will not work as the sample size is too small but thats expected
-run_MaxBin.pl -thread 32 \
-              -contig data/processing/3_assembly/assembly_JC1A/contigs.fasta \
-              -reads data/processing/1_trimmed/JC1A_1P.fastq \
-              -reads2 data/processing/1_trimmed/JC1A_2P.fastq \
-              -out data/processing/4_binning/
+wget -v -O data/k2_standard_16gb_20241228.tar.gz https://genome-idx.s3.amazonaws.com/kraken/k2_standard_16gb_20241228.tar.gz
+tar -xvf data/k2_standard_16gb_20241228.tar.gz -C data/kraken_db
 
-run_MaxBin.pl -thread 32 \
-              -contig data/processing/3_assembly/assembly_JP4D/contigs.fasta \
-              -reads data/processing/1_trimmed/JP4D_1P.fastq \
-              -reads2 data/processing/1_trimmed/JP4D_2P.fastq \
-              -out data/processing/4_binning/
+kraken2 --db data/kraken_db --threads 32 \
+        data/processing/3_assembly/assembly_JC1A/contigs.fasta \
+        --output "data/processing/4_taxonomy/JC1A.kraken" \
+        --report "data/processing/4_taxonomy/JC1A.report"
+
+kraken2 --db data/kraken_db --threads 32 \
+        data/processing/3_assembly/assembly_JP4D/contigs.fasta \
+        --output "data/processing/4_taxonomy/JP4D.kraken" \
+        --report "data/processing/4_taxonomy/JP4D.report"
+
+# optional  generate a report 
+mamba install -c bioconda krona
+mkdir data/processing/5_krona
+cut -f2,3 data/processing/4_taxonomy/JP4D.kraken > data/processing/5_krona/JP4D_krona.input
+cut -f2,3 data/processing/4_taxonomy/JC1A.kraken > data/processing/5_krona/JC1A_krona.input
+
+ktImportTaxonomy data/processing/5_krona/JP4D_krona.input -o data/processing/5_krona/JP4D_krona.out.html
+ktImportTaxonomy data/processing/5_krona/JC1A_krona.input -o data/processing/5_krona/JC1A_krona.out.html
+
+
+
+
+
 
     
