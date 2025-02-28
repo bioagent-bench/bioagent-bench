@@ -64,18 +64,12 @@ kraken2 --db data/kraken_db --threads 32 \
         --output "data/processing/4_taxonomy/JP4D.kraken" \
         --report "data/processing/4_taxonomy/JP4D.report"
 
-# optional  generate a report 
+# optional  generate a visualization report with krona
+wget -v -O data/taxdump.tar.gz ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz
+
 mamba install -c bioconda krona
 mkdir data/processing/5_krona
 cut -f2,3 data/processing/4_taxonomy/JP4D.kraken > data/processing/5_krona/JP4D_krona.input
 cut -f2,3 data/processing/4_taxonomy/JC1A.kraken > data/processing/5_krona/JC1A_krona.input
-
 ktImportTaxonomy data/processing/5_krona/JP4D_krona.input -o data/processing/5_krona/JP4D_krona.out.html
 ktImportTaxonomy data/processing/5_krona/JC1A_krona.input -o data/processing/5_krona/JC1A_krona.out.html
-
-
-
-
-
-
-    
