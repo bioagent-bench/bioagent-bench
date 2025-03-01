@@ -34,3 +34,8 @@ https://jose.theoj.org/papers/10.21105/jose.00209
 https://carpentries-lab.github.io/metagenomics-analysis/
 #### Data background
 The metagenomes that we will use were collected in Cuatro Ciénegas, in a study about the response of the Cuatro Cienegas’ bacterial community to nutrient enrichment. In this study, authors compared the differences between the microbial community in its natural, oligotrophic, phosphorus-deficient environment, a pond from the Cuatro Ciénegas Basin (CCB), and the same microbial community under a fertilization treatment. Sample data is Control mecocosm (JC1A) and fertilized pond (JP4D)
+
+### Identifying molecular mechanisms RNA-Seq
+RNA-seq data from a recent publication where human induced pluripotent stem cells were differentiated to neuronal progenitors and then infected with Zika virus (ZIKV) [4]. The aim of the study was to begin to understand the molecular mechanisms that induce the observed devastating phenotype of newborn-microcephaly from pregnant mothers infected with the virus.
+#### Data background
+In this study, gene expression was measured by RNA-seq using two platforms: MiSeq and NextSeq [4] in duplicates. The total number of samples is eight, with four untreated samples and four infected samples. 

@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+mkdir data
+
+prefetch SRX1605080 SRX1605079 SRX1605078 SRX1605077 SRX1602857 SRX1602856 SRX1602855 SRX1602854 -O data --order kart
