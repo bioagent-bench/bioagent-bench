@@ -4,14 +4,22 @@ uv.lock
 
 evolution/*
 !evolution/run_script.sh
+!evolution/Dockerfile
 
 fibrosis/*
 !fibrosis/run_script.sh
 !fibrosis/family_tree_metadata.csv
+!fibrosis/Dockerfile
 
 deseq/*
 !deseq/run_script.sh
 !deseq/run_deseq.R
+!deseq/Dockerfile
 
 metagenomics/*
 !metagenomics/run_script.sh
+!metagenomics/Dockerfile
+
+zikavirus/*
+!zikavirus/run_scrip.sh
+zikavirus/Dockerfile

@@ -1,6 +1,10 @@
+# Install sra-tools in the base environment
+mamba install -c bioconda sra-tools
+mamba init
+
 mamba create -n rnaseq
 mamba activate rnaseq
-mamba install -c bioconda fastqc multiqc
+mamba install -c bioconda fastqc==0.12.1 multiqc==1.27.1
 
 mkdir data
 prefetch SRR1278968 SRR1278969 SRR1278970 SRR1278971 SRR1278972 SRR1278973 -O data/ 
