@@ -37,3 +37,83 @@ STAR --runThreadN 32 \
     --genomeFastaFiles data/reference/hg38/hg38.fa \
     --sjdbGTFfile data/reference/hg38/hg38.knownGene.gtf \
     --sjdbOverhang 100
+
+mkdir -p processing/2_alignment/feature_count_out
+mamba install -c bioconda subread
+
+# unpaired reads
+for fq in processing/0_fasterqdump/*.fastq; do
+    base=$(basename "$fq" .fastq)
+    if [[ ! "$base" =~ _[12]$ ]]; then
+        echo "Processing unpaired read: $fq"
+        echo "Base name: $base"
+        
+        echo "Aligning reads from $base to the reference genome"
+        mkdir -p processing/2_alignment/unpaired/$base
+        
+        STAR \
+            --genomeDir data/reference/star_index \
+            --sjdbGTFfile data/reference/hg38/hg38.knownGene.gtf \
+            --runThreadN 32 \
+            --outSAMstrandField intronMotif \
+            --outFilterIntronMotifs RemoveNoncanonical \
+            --outFileNamePrefix processing/2_alignment/unpaired/$base/ \
+            --readFilesIn $fq \
+            --outSAMtype BAM Unsorted \
+            --outReadsUnmapped Fastx \
+            --outSAMmode Full
+            
+        suffix="Aligned.out.bam"
+        outname="$base.count.txt"
+        bam="processing/2_alignment/$base/$suffix"
+        
+        featureCounts \
+            -T 32 \
+            -t exon \
+            -g gene_id \
+            -a data/reference/hg38/hg38.knownGene.gtf \
+            -o processing/2_alignment/feature_count_out/$outname \
+            $bam
+    fi
+done
+
+mkdir -p processing/2_alignment/paired
+
+# paired reads
+for fq1 in processing/0_fasterqdump/*_1.fastq; do
+    basename=$(basename "$fq1" _1.fastq)
+    fq2="${fq1/_1.fastq/_2.fastq}"
+    
+    if [ -f "$fq2" ]; then
+        echo "Processing paired-end reads for: $basename"
+        
+        echo "Aligning reads from $basename to the reference genome"
+        mkdir -p processing/2_alignment/paired/$basename
+        
+        STAR \
+            --genomeDir data/reference/star_index \
+            --sjdbGTFfile data/reference/hg38/hg38.knownGene.gtf \
+            --runThreadN 32 \
+            --outSAMstrandField intronMotif \
+            --outFilterIntronMotifs RemoveNoncanonical \
+            --outFileNamePrefix processing/2_alignment/paired/$basename/ \
+            --readFilesIn $fq1 $fq2 \
+            --outSAMtype BAM Unsorted \
+            --outReadsUnmapped Fastx \
+            --outSAMmode Full
+            
+        suffix="Aligned.out.bam"
+        outname="$basename.count.txt"
+        bam="processing/2_alignment/paired/$basename/$suffix"
+        
+        featureCounts \
+            -T 32 \
+            -t exon \
+            -g gene_id \
+            -a data/reference/hg38/hg38.knownGene.gtf \
+            -o processing/2_alignment/feature_count_out/$outname \
+            $bam
+    else
+        echo "Warning: Could not find matching pair file for $fq1"
+    fi
+done
