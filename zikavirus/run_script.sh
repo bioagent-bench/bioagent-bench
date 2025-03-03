@@ -110,6 +110,8 @@ for fq1 in processing/0_fasterqdump/*_1.fastq; do
             -T 32 \
             -t exon \
             -g gene_id \
+            -p \
+            -B \
             -a data/reference/hg38/hg38.knownGene.gtf \
             -o processing/2_alignment/feature_count_out/$outname \
             $bam
