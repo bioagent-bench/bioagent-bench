@@ -119,3 +119,11 @@ for fq1 in processing/0_fasterqdump/*_1.fastq; do
         echo "Warning: Could not find matching pair file for $fq1"
     fi
 done
+
+mkdir processing/3_normalized
+mkdir results
+mamba install -c conda-forge r-base r-dplyr r-readr r-ggplot2 r-pheatmap -y
+mamba install -c conda-forge r-gprofiler2 r-httr r-jsonlite
+mamba install -c bioconda bioconductor-edger bioconductor-deseq2
+Rscript run_normalize.R
+Rscript run_analysis.R

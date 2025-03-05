@@ -8,7 +8,8 @@ RUN chmod +x /app/run_script.sh
 
 RUN mamba init
 
-RUN mamba install -y -c bioconda sra-tools
+# install some default packages that will be used everywhere
+RUN mamba install -y -c bioconda sra-tools r-base
 
 SHELL ["/bin/bash", "-c"]
 

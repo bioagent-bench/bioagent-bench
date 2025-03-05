@@ -22,4 +22,7 @@ metagenomics/*
 
 zikavirus/*
 !zikavirus/run_scrip.sh
-zikavirus/Dockerfile
+!zikavirus/run_normalize.R
+!zikavirus/run_analysis.R
+!zikavirus/data/metadata.csv
+!zikavirus/Dockerfile
