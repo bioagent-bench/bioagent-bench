@@ -17,12 +17,11 @@ deseq/*
 !deseq/Dockerfile
 
 metagenomics/*
+!metagenomics/run_phyloseq.R
 !metagenomics/run_script.sh
 !metagenomics/Dockerfile
 
-zikavirus/*
-!zikavirus/run_scrip.sh
-!zikavirus/run_normalize.R
-!zikavirus/run_analysis.R
-!zikavirus/data/metadata.csv
-!zikavirus/Dockerfile
+comparative-geno/*
+!comparative-geno/Dockerfile
+!comparative-geno/run_script.sh
+!comparative-geno/run_comparative.R
