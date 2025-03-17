@@ -60,7 +60,7 @@ COGSets <- DisjointSet(Pairs = Pairs,
 # Extract sequences for COGs with at least 5 orthologs
 Sequences <- ExtractBy(x = Pairs,
                        y = DBPATH,
-                       z = COGSets[lengths(COGSets) >= 5],
+                       z = COGSets[lengths(COGSets) >= 4],
                        Verbose = TRUE)
 
 # These come back in different orders, so let's match them up

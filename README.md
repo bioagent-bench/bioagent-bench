@@ -35,7 +35,13 @@ https://carpentries-lab.github.io/metagenomics-analysis/
 #### Data background
 The metagenomes that we will use were collected in Cuatro Ciénegas, in a study about the response of the Cuatro Cienegas’ bacterial community to nutrient enrichment. In this study, authors compared the differences between the microbial community in its natural, oligotrophic, phosphorus-deficient environment, a pond from the Cuatro Ciénegas Basin (CCB), and the same microbial community under a fertilization treatment. Sample data is Control mecocosm (JC1A) and fertilized pond (JP4D)
 
-### Identifying molecular mechanisms RNA-Seq
-RNA-seq data from a recent publication where human induced pluripotent stem cells were differentiated to neuronal progenitors and then infected with Zika virus (ZIKV) [4]. The aim of the study was to begin to understand the molecular mechanisms that induce the observed devastating phenotype of newborn-microcephaly from pregnant mothers infected with the virus.
+### Comparative Genomics
+https://www.ahl27.com/CompGenomicsBioc2022/articles/CompGenomicsBioc2022.html
+
 #### Data background
-In this study, gene expression was measured by RNA-seq using two platforms: MiSeq and NextSeq [4] in duplicates. The total number of samples is eight, with four untreated samples and four infected samples. 
+The datasets consists FASTA sequences and GFF annotations of a microbial genome for Micrococcus. The main goal. The goal of is to do phylogenetic reconstruction of clusters of orthologous co-evolving genes. The COGs needs to be filtered based on the following quality criteria.
+1. No paralogs
+2. Clusters present in all 4 organisms
+3. Only present in the coding regions
+4. Must have at least 1 high confidence annotation
+The final result is clustering of the co-evolving genes into functional (annotated clusters)
