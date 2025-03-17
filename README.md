@@ -1,11 +1,33 @@
 ![Funded by Next Gen EU](image.png)
 
-# bio-agent-benchmark
-
+# bioagent-bench
 Benchmark for evaluating LLM agents in bioinformatics
 
-## Running Bio Workflows
-Specific environments for bioinformatics pipelines are solved via mamba which you get via the miniforge installer https://github.com/conda-forge/miniforge
+# Contents
+├── src/
+│ ├── dataset/ # Code for downloading the input and truth files
+├── tasks/ # Individual bioinformatics tasks
+| ├── task_name/
+└─└─├── Dockerfile # You can reproduce the truth files with this
+    ├── run_script.sh/ # Script to run the bioinformatics tools 
+    ├── run_rscript.R/ # Sometimes there is an R downstream analysis
+    └── run_pyscript.R/ # Sometimes there is a Python downstream analysis
+
+# General instructions
+## Some general ideas about the benchmark
+In ideal case you should only care about the src/ folder where you can download the input files, analyze,
+eval them against "truth" files. Different software, versions, assumptions will produce different results.
+Where there is consensus actual ground truth like in GIAB (Genome in a bottle) or simulated data we can 
+produce eval metrics. In other cases we evaluate against correctness of output and try to see if there are 
+at least some overlapping outputs. 
+> **DISCLAIMER:** Do not expect "Truth" files or evals to be correct unless explicitly stated.
+
+## What is allowed?
+Obviously don't prompt the LLM with the scripts used for reproducing the eval files. We have written two
+prompts for the humans reading this given below:
+1. Data background: Start prompting with this to give some background. This is what it was written
+for without reveleaing too much. This is not set in stone, edit it as you wish.
+2. Instruct: This is the goal of the analysis. Edit it as you wish.
 
 ### Experimental evolution
 https://genomics.sschmeier.com/

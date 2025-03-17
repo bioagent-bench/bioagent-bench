@@ -2,26 +2,26 @@
 uv.lock
 *.DS_Store
 
-evolution/*
-!evolution/run_script.sh
-!evolution/Dockerfile
+tasks/evolution/*
+!tasks/evolution/run_script.sh
+!tasks/evolution/Dockerfile
 
-fibrosis/*
-!fibrosis/run_script.sh
-!fibrosis/family_tree_metadata.csv
-!fibrosis/Dockerfile
+tasks/fibrosis/*
+!tasks/fibrosis/run_script.sh
+!vfibrosis/family_tree_metadata.csv
+!tasks/fibrosis/Dockerfile
 
-deseq/*
-!deseq/run_script.sh
-!deseq/run_deseq.R
-!deseq/Dockerfile
+tasks/deseq/*
+!tasks/deseq/run_script.sh
+!tasks/deseq/run_deseq.R
+!tasks/deseq/Dockerfile
 
-metagenomics/*
-!metagenomics/run_phyloseq.R
-!metagenomics/run_script.sh
-!metagenomics/Dockerfile
+tasks/metagenomics/*
+!tasks/metagenomics/run_phyloseq.R
+!tasks/metagenomics/run_script.sh
+!tasks/metagenomics/Dockerfile
 
-comparative-geno/*
-!comparative-geno/Dockerfile
-!comparative-geno/run_script.sh
-!comparative-geno/run_comparative.R
+tasks/comparative-geno/*
+!tasks/comparative-geno/Dockerfile
+!tasks/comparative-geno/run_script.sh
+!tasks/comparative-geno/run_comparative.R
