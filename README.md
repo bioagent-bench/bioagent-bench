@@ -32,7 +32,10 @@ for without reveleaing too much. This is not set in stone, edit it as you wish.
 ### Experimental evolution
 https://genomics.sschmeier.com/
 #### Data background
- The experiment follows a similar strategy as in what is called an “experimental evolution” experiment. The final aim is to identify the genome variations in evolved lines of E. coli. The data is composed of a single ancestor line and two evolved lines. The data is from a paired-end sequencing run data from an Illumina HiSeq. This data has been post-processed in two ways already. All sequences that were identified as belonging to the PhiX genome have been removed. Illumina adapters have been removed as well already.
+The experiment follows a similar strategy as in what is called an “experimental evolution” experiment. The final aim is to identify the genome variations in evolved lines of E. coli. The data is composed of a single ancestor line and two evolved lines. The data is from a paired-end sequencing run data from an Illumina HiSeq. This data has been post-processed in two ways already. All sequences that were identified as belonging to the PhiX genome have been removed. Illumina adapters have been removed as well already.
+ #### Instruct
+ The goal is to find to find and annotate the genome variations in the evolved lines of E.coli. Only output those variants which are shared across both evolved lines
+
 
 ### Cystic fibrosis
 https://github.com/jmchilton/SnpEffect/blob/master/papers/Protocol/annotate_example_1.sh

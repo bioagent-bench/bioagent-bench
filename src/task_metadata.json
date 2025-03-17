@@ -1,0 +1,10 @@
+[
+    {
+        "task_id": "evolution",
+        "name": "E.Coli Directed Evolution Experiment",
+        "description": "This is an example task",
+        "num_bio_tools": 14,
+        "num_packages": 3,
+        "download_urls": "https://osf.io/2jc4a/download"
+    }
+]
