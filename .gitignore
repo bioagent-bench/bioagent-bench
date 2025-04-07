@@ -25,3 +25,7 @@ tasks/comparative-geno/*
 !tasks/comparative-geno/Dockerfile
 !tasks/comparative-geno/run_script.sh
 !tasks/comparative-geno/run_comparative.R
+
+tasks/viral-metagenomics/*
+!tasks/viral-metagenomics/Dockerfile
+!tasks/viral-metagenomics/run_script.sh

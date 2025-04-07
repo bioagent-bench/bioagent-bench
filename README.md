@@ -4,14 +4,15 @@
 Benchmark for evaluating LLM agents in bioinformatics
 
 # Contents
-├── src/
-│ ├── dataset/ # Code for downloading the input and truth files
-├── tasks/ # Individual bioinformatics tasks
-| ├── task_name/
-└─└─├── Dockerfile # You can reproduce the truth files with this
-    ├── run_script.sh/ # Script to run the bioinformatics tools 
-    ├── run_rscript.R/ # Sometimes there is an R downstream analysis
-    └── run_pyscript.R/ # Sometimes there is a Python downstream analysis
+
+- **src/**
+  - **dataset/**: Code for downloading the input and truth files  
+- **tasks/**: Individual bioinformatics tasks  
+  - **task_name/**  
+  - **Dockerfile**: You can reproduce the truth files with this  
+  - **run_script.sh**: Script to run the bioinformatics tools  
+  - **run_rscript.R**: Sometimes there is an R downstream analysis  
+  - **run_pyscript.R**: Sometimes there is a Python downstream analysis
 
 # General instructions
 ## Some general ideas about the benchmark
@@ -32,7 +33,7 @@ for without reveleaing too much. This is not set in stone, edit it as you wish.
 ### Experimental evolution
 https://genomics.sschmeier.com/
 #### Data background
-The experiment follows a similar strategy as in what is called an “experimental evolution” experiment. The final aim is to identify the genome variations in evolved lines of E. coli. The data is composed of a single ancestor line and two evolved lines. The data is from a paired-end sequencing run data from an Illumina HiSeq. This data has been post-processed in two ways already. All sequences that were identified as belonging to the PhiX genome have been removed. Illumina adapters have been removed as well already.
+The experiment follows a similar strategy as in what is called an "experimental evolution" experiment. The final aim is to identify the genome variations in evolved lines of E. coli. The data is composed of a single ancestor line and two evolved lines. The data is from a paired-end sequencing run data from an Illumina HiSeq. This data has been post-processed in two ways already. All sequences that were identified as belonging to the PhiX genome have been removed. Illumina adapters have been removed as well already.
  #### Instruct
  The goal is to find to find and annotate the genome variations in the evolved lines of E.coli. Only output those variants which are shared across both evolved lines
 
@@ -58,7 +59,7 @@ The dataset consists of RNA-Seq samples from Candida parapsilosis wild-type (WT)
 https://jose.theoj.org/papers/10.21105/jose.00209
 https://carpentries-lab.github.io/metagenomics-analysis/
 #### Data background
-The metagenomes that we will use were collected in Cuatro Ciénegas, in a study about the response of the Cuatro Cienegas’ bacterial community to nutrient enrichment. In this study, authors compared the differences between the microbial community in its natural, oligotrophic, phosphorus-deficient environment, a pond from the Cuatro Ciénegas Basin (CCB), and the same microbial community under a fertilization treatment. Sample data is Control mecocosm (JC1A) and fertilized pond (JP4D)
+The metagenomes that we will use were collected in Cuatro Ciénegas, in a study about the response of the Cuatro Cienegas' bacterial community to nutrient enrichment. In this study, authors compared the differences between the microbial community in its natural, oligotrophic, phosphorus-deficient environment, a pond from the Cuatro Ciénegas Basin (CCB), and the same microbial community under a fertilization treatment. Sample data is Control mecocosm (JC1A) and fertilized pond (JP4D)
 
 ### Comparative Genomics
 https://www.ahl27.com/CompGenomicsBioc2022/articles/CompGenomicsBioc2022.html
@@ -70,3 +71,8 @@ The datasets consists FASTA sequences and GFF annotations of a microbial genome 
 3. Only present in the coding regions
 4. Must have at least 1 high confidence annotation
 The final result is clustering of the co-evolving genes into functional (annotated clusters)
+
+### Viral metagenomcis
+https://www.hadriengourle.com/tutorials/metavir/
+#### Data background
+Real dataset published in 2017 in a study in dolphins, where fecal samples where prepared for viral metagenomics study. The dolphin had a self-limiting gastroenteritis of suspected viral origin. We have available two reads from the fecal samples. We want to find the species of the potential viral agent
