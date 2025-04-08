@@ -29,3 +29,8 @@ tasks/comparative-geno/*
 tasks/viral-metagenomics/*
 !tasks/viral-metagenomics/Dockerfile
 !tasks/viral-metagenomics/run_script.sh
+
+tasks/alzheimer-mouse/*
+!tasks/alzheimer-mouse/Dockerfile
+!tasks/alzheimer-mouse/run_script.sh
+!tasks/alzheimer-mouse/run_analysis.py
