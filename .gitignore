@@ -38,3 +38,4 @@ tasks/alzheimer-mouse/*
 tasks/single-cell/*
 !tasks/single-cell/run_script.sh
 !tasks/single-cell/Dockerfile
+!tasks/single-cell/processing.R
