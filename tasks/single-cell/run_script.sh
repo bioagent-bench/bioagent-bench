@@ -52,7 +52,7 @@ kb count processed/1_merged/pbmc_1k_v3_S1_R1.fastq.gz \
    --cellranger \
    -o processed/3_quantification
 
-mamba create -n single-cell-r -c conda-forge r-base r-essentials r-biocmanager
+mamba create -n single-cell-r -c conda-forge r-base r-essentials r-biocmanager==3.20
 mamba activate single-cell-r
 mamba install -c conda-forge r-tidyverse r-seurat r-matrix r-scales r-rjson r-r2html r-dt
 

@@ -1,23 +1,24 @@
 # Introduction ----
 # this script walks through the quality assessment (QA) and analysis of single cell RNA-seq data
 # In the 1st 1/2 of the script, we'll practice some basics using a small (~1000 cell) dataset from human peripheral blood mononuclear cells (PBMCs). This dataset comes from the public datasets on the 10X Genomics website: https://www.10xgenomics.com/resources/datasets
-# In the 2nd 1/2 of the script, we'll import two separate Seurat objects generated from the spleen of naive and Toxoplasma gondii infected mice, giving us an opportunity to create and analyze an integrated dataset
 
-if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-BiocManager::install(version='devel')
+# Set higher timeout for large package downloads
+options(timeout = max(1000, getOption("timeout")))
+
+# Install additional dependencies
+if (!require("remotes"))
+    install.packages("remotes")
+remotes::install_github("mojaveazure/seurat-disk") # Install SeuratDisk
+remotes::install_github("stuart-lab/signac") # Install Signac
+install.packages("hdf5r")
+
+# Install SingleR and related packages
+BiocManager::install(c("SingleR", "celldex"))
+
+# Install other required packages
 BiocManager::install("DropletUtils")
-
-if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-BiocManager::install(version='devel')
 BiocManager::install("scater")
-
-if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-BiocManager::install(version='devel')
 BiocManager::install("Scran")
-
 
 # Load packages ----
 library(tidyverse)
@@ -221,21 +222,7 @@ DoHeatmap(pbmc.1k.seurat, features = top10$gene)
 
 # Assigning identity to cell clusters  ----
 library(SingleR) #automated cell type annotation ('label transfer') using reference data
-library(celldex) #a large collection of reference expression datasets with curated cell type labels for use with SingleR package
-library(pheatmap)
-library(Azimuth) # providing the code below for help with Azimuth installation - Say "yes" to source installation
-# remotes::install_github('satijalab/azimuth', ref = 'master')
-# depending on your existing package environment, unfortunately this can sometimes be a headache to install
-# If azimuth fails to install, you can try the following
-# set a higher timeout option for R as follows:
-    # options(timeout = max(1000, getOption("timeout")))
-    # this high timeout will let you install the following dependency, if R is complaining that it wants it
-    # install.packages("BSgenome.Hsapiens.UCSC.hg38")
-# now try to install Azimuth again
-    # remotes::install_github('satijalab/azimuth', ref = 'master')
-# if running Azimuth fails and complains with the error "object 'CRsparse_colSums' not found", this is a documented error (https://github.com/satijalab/seurat/issues/8202#issue-2047511055)
-# you can fix this with by reinstalling TFBStools as follows:
-    # BiocManager::install("TFBSTools", type = "source", force = TRUE)
+library(celldex) #a large collection of reference expression datasets with curated cell type labels for use with SingleR packages
 
 # it can also be useful to turn the Seurat object into a singleCellExperiment object, for better interoperability with other bioconductor tools
 # two ways to get singleCellExperiment object
@@ -271,133 +258,3 @@ plotScoreHeatmap(predictions)
 #now add back to singleCellExperiment object (or Seurat objects)
 pbmc.1k.sce[["SingleR.labels"]] <- predictions$labels
 plotUMAP(pbmc.1k.sce, colour_by = "SingleR.labels")
-
-# OPTION 2: assign identity to cell clusters using Azimuth
-# Azimuth using reference 'atlas' scRNA-seq datasets to ID clusters in a query dataset
-# Azimuth lets you choose different levels of specificity for cell type annotation
-# The RunAzimuth function can take a Seurat object as input
-pbmc.1k.seurat <- RunAzimuth(pbmc.1k.seurat, reference = "pbmcref", 
-                   query.modality = "RNA", 
-                   umap.name = "azimuth.umap")
-# visualize UMAP with Azimuth labels
-DimPlot(pbmc.1k.seurat, reduction = "umap", group.by  = "predicted.celltype.l1", label = TRUE) + NoLegend()
-
-# Integrate multiple scRNA-seq datasets ----
-# To demonstrate integration, we'll leave behind the PBMC dataset we worked with above
-# We'll read in two Seurat objects - one generated from the spleen of a untreated mouse (control), and the second from the spleen of mouse infected with Toxoplasma gondii
-load("spleen.naive.seurat")
-DimPlot(spleen.naive.seurat, reduction = "umap", split.by = "orig.ident", label = TRUE)
-
-load("spleen.toxoInfected.seurat")
-DimPlot(spleen.toxoInfected.seurat, reduction = "umap", split.by = "orig.ident", label = TRUE)
-
-# since we are now going to work with multiple samples, we need a study design file with our sample metadata
-studyDesign_singleCell <- read_tsv("studyDesign_singleCell.txt")
-
-# extract variables of interest
-sampleID <- studyDesign_singleCell$sampleID
-treatment <- studyDesign_singleCell$treatment
-
-# annotate your seurat objects with as much or as little metadata as you want!
-spleen.naive.seurat$treatment <- treatment[1]
-spleen.toxoInfected.seurat$treatment <- treatment[2]
-
-# merge the two seurat objects together as a single object (note: this is NOT integration)
-spleen_merged <- merge(spleen.naive.seurat, y = c(spleen.toxoInfected.seurat),
-                           add.cell.ids = c("spleen.naive.seurat", "spleen.toxoInfected.seurat"),
-                           project = "Combined", merge.data = TRUE)
-
-spleen_merged <- split(spleen_merged, f = spleen_merged$treatment)
-
-# Run the standard workflow for visualization and clustering
-spleen_merged <- NormalizeData(spleen_merged)
-spleen_merged <- FindVariableFeatures(spleen_merged)
-spleen_merged <- ScaleData(spleen_merged)
-spleen_merged <- RunPCA(spleen_merged)
-spleen_merged <- FindNeighbors(spleen_merged, dims = 1:30, reduction = "pca")
-spleen_merged <- FindClusters(spleen_merged, resolution = 2, cluster.name = "unintegrated_clusters")
-spleen_merged <- RunUMAP(spleen_merged, dims = 1:30, reduction = "pca", reduction.name = "umap.unintegrated")
-DimPlot(spleen_merged, reduction = "umap.unintegrated", group.by = c("treatment", "seurat_clusters"))
-
-# Now we actually integrate!
-# Importantly, the layered integration works based on how the samples are split - above in the code we split the samples according to treatment so this code will integrate across treatment levels
-spleen_integrated <- IntegrateLayers(object = spleen_merged, 
-                                     method = CCAIntegration, 
-                                     orig.reduction = "pca", 
-                                     new.reduction = "integrated.cca",
-                                     verbose = FALSE)
-
-# re-join layers after integration - quick
-spleen_integrated[["RNA"]] <- JoinLayers(spleen_integrated[["RNA"]])
-# repeat clustering and visualization on the integrated seurat object
-spleen_integrated <- FindNeighbors(spleen_integrated, reduction = "integrated.cca", dims = 1:30)
-spleen_integrated <- FindClusters(spleen_integrated, resolution = 1)
-spleen_integrated <- RunUMAP(spleen_integrated, dims = 1:30, reduction = "integrated.cca")
-DimPlot(spleen_integrated, reduction = "umap", group.by = c("treatment", "seurat_clusters"))
-
-# let's see what proportion of our total cells reside in each cluster
-prop.table(table(Idents(spleen_integrated)))
-
-# remember, we have metadata in this integrated seurat object, so you can use this to split your UMAP
-DimPlot(spleen_integrated, reduction = "umap", 
-        #split.by = "treatment", # this facets the plot 
-        group.by = "seurat_clusters", # labels the cells with values from your group.by variable
-        label = TRUE)
-
-# plot genes of interest on UMAP
-FeaturePlot(spleen_integrated, 
-            reduction = "umap", 
-            features = 'Sdc1',
-            pt.size = 0.4, 
-            order = TRUE,
-            split.by = "treatment",
-            min.cutoff = 'q10',
-            label = FALSE)
-
-# we can plot more than one gene here
-my_fav_genes <- c("Cd4", "Cd8a")
-FeaturePlot(spleen_integrated, 
-            reduction = "umap", 
-            features = my_fav_genes,
-            pt.size = 0.4, 
-            order = TRUE,
-            split.by = "treatment",
-            min.cutoff = 'q10',
-            label = FALSE)
-
-# Leveraging cluster identity in your analysis ----
-# now let's rerun our cluster identification using SingleR
-spleen_integrated.sce <- as.SingleCellExperiment(spleen_integrated)
-predictions <- SingleR(test=spleen_integrated.sce, assay.type.test=1, 
-                       ref=MouseRNAseq.data, labels=MouseRNAseq.data$label.main)
-
-# now add back to singleCellExperiment object (or Seurat objects)
-spleen_integrated.sce[["SingleR.labels"]] <- predictions$labels
-plotUMAP(spleen_integrated.sce, colour_by = "SingleR.labels")
-
-spleen_integrated2 <- as.Seurat(spleen_integrated.sce, counts = NULL)
-DimPlot(spleen_integrated2, reduction = "UMAP", 
-        split.by = "treatment", # this facets the plot 
-        group.by = "SingleR.labels", # labels the cells with values from your group.by variable
-        label = TRUE)
-
-# Now let's try annotation with Azimuth
-spleen_integrated <- RunAzimuth(spleen_integrated, reference = "pbmcref", 
-                             query.modality = "RNA", 
-                             umap.name = "azimuth.umap")
-
-# visualize UMAP with Azimuth labels
-DimPlot(spleen_integrated, reduction = "umap", group.by  = "predicted.celltype.l1", label = TRUE) + NoLegend()
-
-# If we now take all the info we get from SingleR and Azimuth, together with our own manual curation using marker genes, we can arrive at a consensus for what each cluster might be.
-# keep in mind that this process takes a lot of manual work, and the more detailed you want to get with your clustering, the more work it will be]
-new.cluster.ids <- c("B cells", "RBCs", "B cells", "B cells", "CD8+ T cells", "RBCs", "CD4+ T cells", "CD4+ T cells", "Monocytes/Macrophages", "Granulocytes", "B cells", "Monocytes/Macrophages", "Plasma cells", "Granulocytes", "CD8+ T cells", "Monocytes/Macrophages", "NK cells", "Monocytes/Macrophages", "Dendritic cells", "19", "20", "21", "22", "23", "24") 
-Idents(spleen_integrated) <- spleen_integrated$seurat_clusters
-names(new.cluster.ids) <- levels(spleen_integrated$seurat_clusters)
-spleen_integrated <- RenameIdents(spleen_integrated, new.cluster.ids)
-# take a look at what you've done
-Idents(spleen_integrated)
-# we finish by plotting the UMAP with the new cluster labels 
-DimPlot(spleen_integrated, reduction = "umap", 
-        split.by = "treatment", # this facets the plot 
-        label = TRUE)
