@@ -1,0 +1,19 @@
+name: single-cell
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - scanpy
+  - leidenalg
+  - pandas
+  - numpy
+  - anndata
+  - matplotlib
+  - seaborn
+  - scikit-learn
+  - scipy
+  - python-igraph
+  - pip
+  - pip:
+    - gzip-reader 
