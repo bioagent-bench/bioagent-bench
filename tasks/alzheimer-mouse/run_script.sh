@@ -11,7 +11,7 @@ mkdir -p ./data
 mkdir -p ./outputs
 mkdir -p ./results
 
-wget -O ./data/alzheimer_mouse_data.tar.gz "https://osf.io/download/6833609b760196a01c53936f/"
+wget -O ./data/alzheimer_mouse_data.tar.gz "https://osf.io/download/6833661cfe08c0f335d6a716/"
 tar -xzf ./data/alzheimer_mouse_data.tar.gz -C ./data --strip-components=1
 
 # Remove the tar.gz file to save space
