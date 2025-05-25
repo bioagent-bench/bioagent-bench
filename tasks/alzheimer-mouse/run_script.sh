@@ -1,2 +1,3 @@
-mamba create -n alzheimer-analysis -c bioconda pandas numpy mygene scipy statsmodels gseapy requests networkx
+mamba create -f environment.yml
+mkdir -p ./data
 python run_analysis.py

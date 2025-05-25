@@ -1,6 +1,4 @@
 import os
-import subprocess
-import gzip
 import pandas as pd
 import numpy as np
 import mygene
@@ -11,16 +9,6 @@ import requests
 import networkx as nx
 from io import StringIO
 
-
-def download_and_load_data(url, output_filename, sep="\t", column_filter=None):
-    subprocess.run(["wget", "-O", output_filename + ".gz", url], check=True)
-    with gzip.open(output_filename + ".gz", "rb") as gz_file:
-        with open(output_filename, "wb") as out_file:
-            out_file.write(gz_file.read())
-    df = pd.read_csv(output_filename, sep=sep, index_col=0)
-    if column_filter:
-        df = df[[col for col in df.columns if column_filter in col]]
-    return df
 
 def annotate_genes(df):
     mg = mygene.MyGeneInfo()
@@ -77,10 +65,8 @@ def fetch_string_ppi(gene_list, species='10090'):
 def main():
     os.makedirs("outputs", exist_ok=True)
 
-    # 1. Download and annotate datasets
-    countlist_5xFAD = download_and_load_data(
-        "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE168137&format=file&file=GSE168137%5FcountList%2Etxt%2Egz",
-        ".data/GSE168137_countList.txt", column_filter="cortex_8mon")
+    # 1. Load and annotate datasets
+    countlist_5xFAD = pd.read_csv("./data/GSE168137_countList.txt", sep="\t", index_col=0)
     countlist_5xFAD.columns = [
         "5xFAD_cortex_8mon_Female_295", "5xFAD_cortex_8mon_Female_312", "5xFAD_cortex_8mon_Female_339", "5xFAD_cortex_8mon_Female_341", "5xFAD_cortex_8mon_Female_342",
         "5xFAD_cortex_8mon_Male_299", "5xFAD_cortex_8mon_Male_300", "5xFAD_cortex_8mon_Male_307", "5xFAD_cortex_8mon_Male_387", "5xFAD_cortex_8mon_Male_390",
@@ -89,9 +75,7 @@ def main():
     ]
     countlist_5xFAD = annotate_genes(countlist_5xFAD)
 
-    countlist_3xTG_AD = download_and_load_data(
-        "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE161904&format=file&file=GSE161904%5FRaw%5Fgene%5Fcounts%5Fcortex%2Etxt%2Egz",
-        ".data/GSE161904_Raw_gene_counts_cortex.txt", column_filter="G3")
+    countlist_3xTG_AD = pd.read_csv("./data/GSE161904_Raw_gene_counts_cortex.txt", sep="\t", index_col=0)
     countlist_3xTG_AD.columns = ['3xTG_AD_Cortex_R1', '3xTG_AD_Cortex_R3', '3xTG_AD_Cortex_R4', 'WT_Cortex_R10', 'WT_Cortex_R17', 'WT_Cortex_R9']
     countlist_3xTG_AD = annotate_genes(countlist_3xTG_AD)
 

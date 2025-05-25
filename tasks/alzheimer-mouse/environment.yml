@@ -1,0 +1,16 @@
+name: alzheimer-analysis
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - pandas
+  - numpy
+  - mygene
+  - scipy
+  - statsmodels
+  - requests
+  - networkx
+  - pip
+  - pip:
+    - gseapy

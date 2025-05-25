@@ -34,6 +34,7 @@ tasks/alzheimer-mouse/*
 !tasks/alzheimer-mouse/Dockerfile
 !tasks/alzheimer-mouse/run_script.sh
 !tasks/alzheimer-mouse/run_analysis.py
+!tasks/alzheimer-mouse/environment.yml
 
 tasks/single-cell/*
 !tasks/single-cell/run_script.sh
