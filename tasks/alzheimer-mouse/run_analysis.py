@@ -136,8 +136,8 @@ def main():
                             treated_columns=[col for col in norm_5xFAD.columns if "5xFAD" in col],
                             control_columns=[col for col in norm_5xFAD.columns if "BL6" in col])
     deg_3xTG_AD = perform_dea(norm_3xTG_AD,
-                              treated_columns=['3xTG_AD_Cortex_G3'],
-                              control_columns=['WT_R10','WT_R17','WT_R9'])
+                              treated_columns=['3xTG_AD_Cortex_R1','3xTG_AD_Cortex_R3','3xTG_AD_Cortex_R4'],
+                              control_columns=['WT_Cortex_R10','WT_Cortex_R17','WT_Cortex_R9'])
     DEA_PS3O1S['abs_log2fc'] = DEA_PS3O1S['log2fc'].abs()
     deg_PS3O1S = DEA_PS3O1S[(DEA_PS3O1S['abs_log2fc'] > 0.75) & (DEA_PS3O1S['pval'] < 0.075)]
 
