@@ -1,10 +1,17 @@
-mamba create -f environment.yml
+#!/bin/bash
+
+source ~/miniforge3/etc/profile.d/conda.sh
+source ~/miniforge3/etc/profile.d/mamba.sh
+
+mamba env create -f environment.yml || true
+
+mamba activate alzheimer-analysis
+
 mkdir -p ./data
 mkdir -p ./outputs
 mkdir -p ./results
 
-# Download the data 
-wget -O ./data/alzheimer_mouse_data.tar.gz "https://osf.io/download/6832e9df21129298ddd6a3f8/"
+wget -O ./data/alzheimer_mouse_data.tar.gz "https://osf.io/download/6833609b760196a01c53936f/"
 tar -xzf ./data/alzheimer_mouse_data.tar.gz -C ./data --strip-components=1
 
 # Remove the tar.gz file to save space

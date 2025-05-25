@@ -1,42 +1,19 @@
+# Development files
 .python-version
 uv.lock
 *.DS_Store
 
-tasks/evolution/*
-!tasks/evolution/run_script.sh
-!tasks/evolution/Dockerfile
+# Ignore all files in task directories
+tasks/*/* 
 
-tasks/fibrosis/*
-!tasks/fibrosis/run_script.sh
-!vfibrosis/family_tree_metadata.csv
-!tasks/fibrosis/Dockerfile
+# Allow common task files
+!tasks/*/Dockerfile
+!tasks/*/run_script.sh
+!tasks/*/environment.yml
 
-tasks/deseq/*
-!tasks/deseq/run_script.sh
+# Task-specific allowed files
 !tasks/deseq/run_deseq.R
-!tasks/deseq/Dockerfile
-
-tasks/metagenomics/*
 !tasks/metagenomics/run_phyloseq.R
-!tasks/metagenomics/run_script.sh
-!tasks/metagenomics/Dockerfile
-
-tasks/comparative-geno/*
-!tasks/comparative-geno/Dockerfile
-!tasks/comparative-geno/run_script.sh
 !tasks/comparative-geno/run_comparative.R
-
-tasks/viral-metagenomics/*
-!tasks/viral-metagenomics/Dockerfile
-!tasks/viral-metagenomics/run_script.sh
-
-tasks/alzheimer-mouse/*
-!tasks/alzheimer-mouse/Dockerfile
-!tasks/alzheimer-mouse/run_script.sh
 !tasks/alzheimer-mouse/run_analysis.py
-!tasks/alzheimer-mouse/environment.yml
-
-tasks/single-cell/*
-!tasks/single-cell/run_script.sh
-!tasks/single-cell/Dockerfile
-!tasks/single-cell/environment.yml
+!tasks/fibrosis/family_tree_metadata.csv
