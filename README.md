@@ -79,6 +79,12 @@ https://www.hadriengourle.com/tutorials/metavir/
 #### Data background
 Real dataset published in 2017 in a study in dolphins, where fecal samples where prepared for viral metagenomics study. The dolphin had a self-limiting gastroenteritis of suspected viral origin. We have available two reads from the fecal samples. We want to find the species of the potential viral agent
 
+#### Goal
+I have paired-end sequencing data from a fecal sample of a dolphin that experienced gastroenteritis of suspected viral origin. I need to identify viral species present in this sample. Please analyze the sequencing data and provide the results in a CSV format with the following columns:
+contig_count: number of contigs matching each classification
+domain: taxonomic domain (e.g., Viruses)
+species: name of the viral species
+
 ### Alzheimer Mouse Models
 Alzheimer's Disease (AD) is a progressive neurodegenerative disorder characterized by hallmark pathologies such as amyloid-β plaques, tau protein tangles, synaptic dysfunction, and neuroinflammation. While mice do not naturally develop Alzheimer's Disease, transgenic mouse models have been developed to recapitulate key pathological features of the disease, enabling researchers to study its underlying mechanisms and evaluate potential therapeutic interventions.
 

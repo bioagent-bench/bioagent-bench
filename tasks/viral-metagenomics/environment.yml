@@ -1,0 +1,12 @@
+name: viral-metagenomics
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - fastp
+  - bowtie2
+  - kaiju
+  - krona
+  - megahit
+  - prokka
