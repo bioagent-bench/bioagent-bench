@@ -98,6 +98,75 @@ def fetch_string_ppi(gene_list, species='10090'):
         logging.error(f"Error fetching PPI data: {str(e)}")
         return None
 
+
+def compare_pathway_enrichment(kegg_files, output_file="results/pathway_comparison.csv"):
+    """
+    Compare pathway enrichment across different mouse models.
+    Only outputs pathways that are shared between all models with their respective p-values.
+    
+    Args:
+        kegg_files: Dict of {model_name: kegg_file_path}
+        output_file: Path to save comparison CSV
+    """
+    model_pathways = {}
+    all_pathways = set()
+    
+    # Load pathway data for each model
+    for model, file in kegg_files.items():
+        df = pd.read_csv(file)
+        model_pathways[model] = df
+        all_pathways.update(df['Term'].values)
+    
+    # Create comparison matrix
+    results = []
+    for pathway in all_pathways:
+        is_shared = True
+        row = {'Pathway': pathway}
+        
+        # Add p-value for each model
+        for model, df in model_pathways.items():
+            pathway_data = df[df['Term'] == pathway]
+            if not pathway_data.empty:
+                row[f"{model}_pvalue"] = pathway_data['P-value'].iloc[0]
+            else:
+                is_shared = False
+                break
+        
+        # Only add pathways that are present in all models
+        if is_shared:
+            results.append(row)
+    
+    # Create DataFrame and sort by minimum p-value across models
+    pathway_df = pd.DataFrame(results)
+    
+    if not pathway_df.empty:
+        # Calculate minimum p-value for sorting
+        pvalue_cols = [f"{model}_pvalue" for model in model_pathways.keys()]
+        pathway_df['min_pvalue'] = pathway_df[pvalue_cols].min(axis=1)
+        
+        # Sort by minimum p-value and remove the temporary column
+        pathway_df = pathway_df.sort_values('min_pvalue')
+        pathway_df = pathway_df.drop('min_pvalue', axis=1)
+        
+        # Reorder columns to put Pathway first
+        cols = ['Pathway'] + [f"{model}_pvalue" for model in model_pathways.keys()]
+        pathway_df = pathway_df[cols]
+        
+        # Save to CSV
+        pathway_df.to_csv(output_file, index=False)
+        logging.info(f"Found {len(pathway_df)} pathways shared across all models")
+        logging.info(f"Pathway comparison saved to {output_file}")
+        
+        # Log top 5 most significant shared pathways
+        logging.info("\nTop 5 most significant shared pathways:")
+        for _, row in pathway_df.head().iterrows():
+            pathway = row['Pathway']
+            pvals = [f"{row[f'{model}_pvalue']:.2e}" for model in model_pathways.keys()]
+            logging.info(f"{pathway}: {', '.join(pvals)}")
+    else:
+        logging.info("No pathways found that are shared across all models")
+
+
 def main():
     setup_logging()
     logging.info("Starting Alzheimer's mouse model analysis")
@@ -166,29 +235,18 @@ def main():
         enr = gp.enrichr(gene_list=gene_list.dropna().tolist(), gene_sets=["KEGG_2016"], organism='mouse')
         enr.results.to_csv(f"outputs/KEGG_{label}.csv", index=False)
 
-    # 6. PPI Analysis
-    gene_list_all = deg_5xFAD['Gene_Name'].dropna().tolist() + \
-                    deg_3xTG_AD['Gene_Name'].dropna().tolist() + \
-                    deg_PS3O1S['gene_name'].dropna().tolist()
 
-    ppi_data = fetch_string_ppi(gene_list_all)
-    ppi_df = pd.read_csv(StringIO(ppi_data), sep="\t")
-    ppi_df_filtered = ppi_df[ppi_df['score'] > 0.7]
-    ppi_df_filtered.to_csv("outputs/STRING_PPI_filtered.csv", index=False)
-
-    G = nx.Graph()
-    for _, row in ppi_df_filtered.iterrows():
-        G.add_edge(row[0], row[1], weight=row['score'])
-
-    degree_df = pd.DataFrame(sorted(nx.degree_centrality(G).items(), key=lambda x: x[1], reverse=True)[:10],
-                             columns=["Protein", "Degree_Centrality"])
-    degree_df.to_csv("outputs/Top10_Degree_Centrality.csv", index=False)
-
-    betweenness_df = pd.DataFrame(sorted(nx.betweenness_centrality(G).items(), key=lambda x: x[1], reverse=True)[:10],
-                                  columns=["Protein", "Betweenness_Centrality"])
-    betweenness_df.to_csv("outputs/Top10_Betweenness_Centrality.csv", index=False)
-
-    logging.info("Analysis complete! All outputs saved to the outputs/ directory")
+    # Prepare file paths for pathway analysis
+    kegg_files = {
+        '5xFAD': 'outputs/KEGG_5xFAD.csv',
+        '3xTG_AD': 'outputs/KEGG_3xTG_AD.csv',
+        'PS3O1S': 'outputs/KEGG_PS3O1S.csv'
+    }
+    
+    # Run pathway comparison
+    compare_pathway_enrichment(kegg_files)
+    
+    logging.info("Analysis complete! All outputs and results saved to the appropriate directory")
 
 if __name__ == "__main__":
     main()

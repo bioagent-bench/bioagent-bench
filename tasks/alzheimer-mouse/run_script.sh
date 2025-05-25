@@ -1,5 +1,7 @@
 mamba create -f environment.yml
 mkdir -p ./data
+mkdir -p ./outputs
+mkdir -p ./results
 
 # Download the data 
 wget -O ./data/alzheimer_mouse_data.tar.gz "https://osf.io/download/6832e9df21129298ddd6a3f8/"
