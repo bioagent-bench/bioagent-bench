@@ -67,6 +67,8 @@ def main():
 
     # 1. Load and annotate datasets
     countlist_5xFAD = pd.read_csv("./data/GSE168137_countList.txt", sep="\t", index_col=0)
+    # Keep only columns containing 'cortex_8mo'
+    countlist_5xFAD = countlist_5xFAD.loc[:, countlist_5xFAD.columns.str.contains('cortex_8mo')]
     countlist_5xFAD.columns = [
         "5xFAD_cortex_8mon_Female_295", "5xFAD_cortex_8mon_Female_312", "5xFAD_cortex_8mon_Female_339", "5xFAD_cortex_8mon_Female_341", "5xFAD_cortex_8mon_Female_342",
         "5xFAD_cortex_8mon_Male_299", "5xFAD_cortex_8mon_Male_300", "5xFAD_cortex_8mon_Male_307", "5xFAD_cortex_8mon_Male_387", "5xFAD_cortex_8mon_Male_390",
@@ -76,6 +78,7 @@ def main():
     countlist_5xFAD = annotate_genes(countlist_5xFAD)
 
     countlist_3xTG_AD = pd.read_csv("./data/GSE161904_Raw_gene_counts_cortex.txt", sep="\t", index_col=0)
+    countlist_3xTG_AD = countlist_3xTG_AD.loc[:, countlist_3xTG_AD.columns.str.contains('G3')]
     countlist_3xTG_AD.columns = ['3xTG_AD_Cortex_R1', '3xTG_AD_Cortex_R3', '3xTG_AD_Cortex_R4', 'WT_Cortex_R10', 'WT_Cortex_R17', 'WT_Cortex_R9']
     countlist_3xTG_AD = annotate_genes(countlist_3xTG_AD)
 
@@ -90,8 +93,8 @@ def main():
                             treated_columns=[col for col in norm_5xFAD.columns if "5xFAD" in col],
                             control_columns=[col for col in norm_5xFAD.columns if "BL6" in col])
     deg_3xTG_AD = perform_dea(norm_3xTG_AD,
-                              treated_columns=['3xTG_AD_Cortex_R1','3xTG_AD_Cortex_R3','3xTG_AD_Cortex_R4'],
-                              control_columns=['WT_Cortex_R10','WT_Cortex_R17','WT_Cortex_R9'])
+                              treated_columns=['3xTG_AD_Cortex_G3'],
+                              control_columns=['WT_R10','WT_R17','WT_R9'])
     DEA_PS3O1S['abs_log2fc'] = DEA_PS3O1S['log2fc'].abs()
     deg_PS3O1S = DEA_PS3O1S[(DEA_PS3O1S['abs_log2fc'] > 0.75) & (DEA_PS3O1S['pval'] < 0.075)]
 
