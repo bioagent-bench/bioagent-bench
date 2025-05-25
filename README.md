@@ -30,6 +30,8 @@ prompts for the humans reading this given below:
 for without reveleaing too much. This is not set in stone, edit it as you wish.
 2. Instruct: This is the goal of the analysis. Edit it as you wish.
 
+## Datasets and tasks
+
 ### Experimental evolution
 https://genomics.sschmeier.com/
 #### Data background
@@ -77,10 +79,57 @@ https://www.hadriengourle.com/tutorials/metavir/
 #### Data background
 Real dataset published in 2017 in a study in dolphins, where fecal samples where prepared for viral metagenomics study. The dolphin had a self-limiting gastroenteritis of suspected viral origin. We have available two reads from the fecal samples. We want to find the species of the potential viral agent
 
-### Alzheimer mouse models
-https://github.com/evanpeikon/Mouse_Alz_Models
-### Data background
-The purpose of this project is to explore the similarities, differences, and overlapping features—including differentially expressed genes (DEGs), Gene Ontology (GO) terms, biological pathways, and protein-protein interaction (PPI) networks—between three mutant mouse models of Alzheimer’s disease (AD). This analysis is part of a larger project aimed at understanding overlapping molecular features between Alzheimer’s Disease and spaceflight-related neurodegeneration. In this project, we focus on three widely used AD mouse models:
-  a) 5xFAD: This model carries five familial AD mutations across APP (amyloid precursor protein) and PSEN1 (presenilin-1) genes. It exhibits aggressive amyloid-β plaque deposition, neuronal loss, and gliosis at an early age, making it an ideal model for studying amyloid pathology.  
-  b) 3xTG-AD: This triple transgenic model carries mutations in APP, PSEN1, and MAPT (tau). It develops both amyloid plaques and tau tangles, as well as cognitive impairments, providing a more comprehensive representation of AD pathology.  
-  c) PS3O1S: This model harbors mutations in presenilin-1 and other associated genes. It exhibits a slower progression of amyloid-β accumulation and a more signficant accumulation of abnormal tau protein aggregates characteristic of tauopathies like Alzheimer's disease.  
+### Alzheimer Mouse Models
+Alzheimer's Disease (AD) is a progressive neurodegenerative disorder characterized by hallmark pathologies such as amyloid-β plaques, tau protein tangles, synaptic dysfunction, and neuroinflammation. While mice do not naturally develop Alzheimer's Disease, transgenic mouse models have been developed to recapitulate key pathological features of the disease, enabling researchers to study its underlying mechanisms and evaluate potential therapeutic interventions.
+
+#### Source
+This dataset and documentation is sourced from [@evanpeikon/Mouse_Alz_Models](https://github.com/evanpeikon/Mouse_Alz_Models)
+
+#### Data Sources
+The data comes from three GEO studies examining different transgenic mouse models of Alzheimer's disease:
+- GSE168137: 5xFAD mouse model characterization
+- GSE161904: 3xTg-AD mouse model transcriptional profiling
+- GSE118523: P301S tau transgenic mice CNS profiling
+
+#### Dataset Files
+1. GSE168137_countList.txt (5xFAD)
+- Control samples: BL6 wild-type mice (10 total)
+  - 5 females: BL6_cortex_8mon_Female_(322,338,340,348,351)
+  - 5 males: BL6_cortex_8mon_Male_(389,396,399,410,412)
+- Treatment samples: 5xFAD mice (10 total)
+  - 5 females: 5xFAD;BL6_cortex_8mon_Female_(295,312,339,341,342)
+  - 5 males: 5xFAD;BL6_cortex_8mon_Male_(299,300,307,387,390)
+- Age: 8 months
+- Tissue: Cortex
+- Format: Tab-separated gene counts matrix
+
+2. GSE161904_Raw_gene_counts_cortex.txt (3xTG-AD)
+- Control samples: G3R10_Cortex_WT, G3R7_Cortex_WT, G3R9_Cortex_WT
+- Treatment samples: G3R1_Cortex_3xTgAD, G3R3_Cortex_3xTgAD, G3R4_Cortex_3xTgAD
+- Format: Tab-separated gene counts matrix with ENSEMBL IDs
+
+3.  DEA_PS3O1S.csv (PS3O1S)
+- Control samples: Wild-type (WT) mice, 3 replicates (FPKM.tau_01 to tau_03)
+- Treatment samples: PS301S transgenic mice, 3 replicates (FPKM.tau_04 to tau_06)
+- Format: CSV with differential expression analysis results including:
+  - Fold change (fc)
+  - Log2 fold change (log2fc)
+  - P-value (pval)
+  - Q-value (qval)
+  - Mean FPKM values for both conditions
+
+#### Goal
+Perform a comparative analysis of three different Alzheimer's Disease mouse models (5xFAD, 3xTG-AD, and PS3O1S) to identify shared molecular pathways. The analysis should:
+
+1. Process and normalize the raw gene expression data for each model
+2. Perform differential expression analysis with the following criteria:
+   - Adjusted p-value < 0.075
+   - Absolute log2 fold change > 0.75
+3. Conduct pathway enrichment analysis using KEGG pathways for each model
+4. Generate a final comparison CSV file that contains:
+   - Common pathways present across all three models
+   - Corresponding p-values for each pathway-model combination
+   - Pathways sorted by minimum p-value across models
+
+The output should be a CSV file with columns: Pathway, 5xFAD_pvalue, 3xTG_AD_pvalue, PS3O1S_pvalue, where each row represents a pathway found in all three models.
+
