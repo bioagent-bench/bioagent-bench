@@ -39,7 +39,7 @@ snpEff \
 SnpSift \
     -Xmx${AVAILABLE_MEM_GB}g \
     caseControl -v \
-    -tfam "${SCRIPT_DIR}/data/pedigree.tfam" \
+    -tfam "${SCRIPT_DIR}/data/protocols/pedigree.tfam" \
     "${SCRIPT_DIR}/data/ex1.eff.vcf" \
     > "${SCRIPT_DIR}/data/ex1.eff.cc.vcf"
 
@@ -51,7 +51,7 @@ cat "${SCRIPT_DIR}/data/ex1.eff.cc.vcf" \
 
 # Download and prepare ClinVar data
 wget -O "${SCRIPT_DIR}/data/clinvar_2025.vcf.gz" \
-    https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh37/clinvar_20250217.vcf.gz
+    https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh37/clinvar_20250521.vcf.gz
 gunzip -k "${SCRIPT_DIR}/data/clinvar_2025.vcf.gz"
 
 # Annotate with ClinVar
@@ -67,4 +67,3 @@ cat "${SCRIPT_DIR}/data/ex1.eff.cc.clinvar.vcf" \
     | SnpSift filter \
     "(GENEINFO[*] =~ 'CFTR') & ((EFF[*].IMPACT = 'HIGH') | (EFF[*].IMPACT = 'MODERATE')) & (Cases[0] = 3) & (Controls[0] = 0)" \
     > "${SCRIPT_DIR}/output_cf_variant.txt"
-
