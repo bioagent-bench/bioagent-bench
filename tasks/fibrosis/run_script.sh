@@ -1,36 +1,70 @@
 #!/bin/bash
 set -e
 
-mkdir data
-# This is the source data from the tutorial
-# TODO: Replace this download link with a real upload folder
-wget -O data/fibrosis.tar.gz DL_LINK 
-tar -xzf data/fibrosis.tar.gz -C data/
+# Get the absolute path of the script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-mamba create -n fibrosis_env -c bioconda snpeff snpsift
+# Calculate optimal memory (70% of total system memory)
+TOTAL_MEM_KB=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+AVAILABLE_MEM_GB=$((TOTAL_MEM_KB * 7 / (1024 * 1024 * 10)))
+
+source ~/miniforge3/etc/profile.d/conda.sh
+source ~/miniforge3/etc/profile.d/mamba.sh
+
+# Create directory structure
+mkdir -p "${SCRIPT_DIR}/data"
+
+# Download and extract source data
+wget -O "${SCRIPT_DIR}/data/protocols.zip" \
+    "http://sourceforge.net/projects/snpeff/files/protocols.zip"
+unzip "${SCRIPT_DIR}/data/protocols.zip" -d "${SCRIPT_DIR}/data/"
+rm "${SCRIPT_DIR}/data/protocols.zip"  # Clean up zip file after extraction
+
+# Set up environment
+mamba env create -f "${SCRIPT_DIR}/environment.yml" || true
 mamba activate fibrosis_env
+
+# Download reference data
 snpEff download -v GRCh37.75
-snpEff -Xmx12g -v -lof -motif -nextProt GRCh37.75 data/protocols/ex1.vcf > data/ex1.eff.vcf
 
-# this converts the csv metadata to tfam format
-awk -F',' 'NR>1 {print "CEPH_1463", $1, ($3=="0" ? "0" : $3), ($4=="0" ? "0" : $4), $5, $6}' family_tree_metadata.csv > data/pedigree.tfam
+# Run SNP effect prediction
+snpEff \
+    -Xmx${AVAILABLE_MEM_GB}g \
+    -v -lof -motif -nextProt \
+    GRCh37.75 \
+    "${SCRIPT_DIR}/data/protocols/ex1.vcf" \
+    > "${SCRIPT_DIR}/data/ex1.eff.vcf"
 
-SnpSift -Xmx100g caseControl -v -tfam data/pedigree.tfam data/ex1.eff.vcf \
-  > data/ex1.eff.cc.vcf
+# Run case-control analysis
+SnpSift \
+    -Xmx${AVAILABLE_MEM_GB}g \
+    caseControl -v \
+    -tfam "${SCRIPT_DIR}/data/pedigree.tfam" \
+    "${SCRIPT_DIR}/data/ex1.eff.vcf" \
+    > "${SCRIPT_DIR}/data/ex1.eff.cc.vcf"
 
-cat data/ex1.eff.cc.vcf \
-| SnpSift filter \
-"(Cases[0] = 3) & (Controls[0] = 0) & ((EFF[*].IMPACT = 'HIGH') | (EFF[*].IMPACT = 'MODERATE'))" \
-> data/ex1.filtered.vcf
+# Filter variants based on case-control and effect impact
+cat "${SCRIPT_DIR}/data/ex1.eff.cc.vcf" \
+    | SnpSift filter \
+    "(Cases[0] = 3) & (Controls[0] = 0) & ((EFF[*].IMPACT = 'HIGH') | (EFF[*].IMPACT = 'MODERATE'))" \
+    > "${SCRIPT_DIR}/data/ex1.filtered.vcf"
 
-wget -O data/clinvar_2025.vcf.gz https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh37/clinvar_20250217.vcf.gz
-gunzip -k data/clinvar_2025.vcf.gz
+# Download and prepare ClinVar data
+wget -O "${SCRIPT_DIR}/data/clinvar_2025.vcf.gz" \
+    https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh37/clinvar_20250217.vcf.gz
+gunzip -k "${SCRIPT_DIR}/data/clinvar_2025.vcf.gz"
 
-SnpSift -Xmx100g annotate -v data/clinvar_2025.vcf data/ex1.eff.cc.vcf \
-> data/ex1.eff.cc.clinvar.vcf
+# Annotate with ClinVar
+SnpSift \
+    -Xmx${AVAILABLE_MEM_GB}g \
+    annotate -v \
+    "${SCRIPT_DIR}/data/clinvar_2025.vcf" \
+    "${SCRIPT_DIR}/data/ex1.eff.cc.vcf" \
+    > "${SCRIPT_DIR}/data/ex1.eff.cc.clinvar.vcf"
 
-cat data/ex1.eff.cc.clinvar.vcf \
-| SnpSift filter \
+# Filter for CFTR variants
+cat "${SCRIPT_DIR}/data/ex1.eff.cc.clinvar.vcf" \
+    | SnpSift filter \
     "(GENEINFO[*] =~ 'CFTR') & ((EFF[*].IMPACT = 'HIGH') | (EFF[*].IMPACT = 'MODERATE')) & (Cases[0] = 3) & (Controls[0] = 0)" \
-> output_cf_variant.txt
+    > "${SCRIPT_DIR}/output_cf_variant.txt"
 
