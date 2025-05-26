@@ -1,83 +1,104 @@
-# Install sra-tools in the base environment
-mamba install -c bioconda sra-tools
-mamba init
+#!/bin/bash
+set -e
 
-mamba create -n rnaseq
+# Get the absolute path of the script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Calculate optimal thread count (75% of available cores)
+THREADS=$(( $(nproc) * 3 / 4 ))
+
+# Source conda/mamba
+source ~/miniforge3/etc/profile.d/conda.sh
+source ~/miniforge3/etc/profile.d/mamba.sh
+
+# Create and activate the main environment
+mamba env create -f "${SCRIPT_DIR}/environment.yml" || true
 mamba activate rnaseq
-mamba install -c bioconda fastqc==0.12.1 multiqc==1.27.1
 
-mkdir data
-prefetch SRR1278968 SRR1278969 SRR1278970 SRR1278971 SRR1278972 SRR1278973 -O data/ 
+# Create output directories
+mkdir -p "${SCRIPT_DIR}/processing"/{0_fasterqdump,1_fastqc,2_multiqc,3_trimming,4_fastqc_trimmed,5_multiqc_trimmed,6_indexing,7_mapping,8_deseq,9_gorich}
+mkdir -p "${SCRIPT_DIR}/data/reference"
 
-mamba install -c bioconda fastqc multiqc
+# Download SRA files
+# prefetch SRR1278968 SRR1278969 SRR1278970 SRR1278971 SRR1278972 SRR1278973 \
+#     -O "${SCRIPT_DIR}/data/"
 
-mkdir -p data/processing/0_fasterqdump
-for sra_file in data/SRR*/**.sra; do
-    fasterq-dump "$sra_file" -O data/processing/0_fasterqdump
+# Convert SRA to FASTQ
+for sra_file in "${SCRIPT_DIR}"/data/SRR*/*.sra; do
+    fasterq-dump "$sra_file" -O "${SCRIPT_DIR}/processing/0_fasterqdump"
 done 
 
-mkdir 1_fastqc
-fastqc data/processing/0_fasterqdump/*fastq -o data/processing/1_fastqc -t 32
-multiqc data/processing/1_fastqc -o data/processing/2_multiqc
+# Run FastQC on raw data
+fastqc "${SCRIPT_DIR}/processing/0_fasterqdump/"*fastq \
+    -o "${SCRIPT_DIR}/processing/1_fastqc" \
+    -t "${THREADS}"
+multiqc "${SCRIPT_DIR}/processing/1_fastqc" \
+    -o "${SCRIPT_DIR}/processing/2_multiqc"
 
-mamba install bioconda::trimmomatic
-mkdir data/processing/3_trimming
-
-for file in data/processing/0_fasterqdump/*_1.fastq; do
+# Trim reads
+for file in "${SCRIPT_DIR}/processing/0_fasterqdump/"*_1.fastq; do
     base=$(basename "$file" _1.fastq) 
-    trimmomatic PE -threads 32 \
-        data/processing/0_fasterqdump/${base}_1.fastq \
-        data/processing/0_fasterqdump/${base}_2.fastq \
-        data/processing/2_trimming/${base}_1P.fastq \
-        data/processing/2_trimming/${base}_1U.fastq \
-        data/processing/2_trimming/${base}_2P.fastq \
-        data/processing/2_trimming/${base}_2U.fastq \
+    trimmomatic PE -threads "${THREADS}" \
+        "${SCRIPT_DIR}/processing/0_fasterqdump/${base}_1.fastq" \
+        "${SCRIPT_DIR}/processing/0_fasterqdump/${base}_2.fastq" \
+        "${SCRIPT_DIR}/processing/3_trimming/${base}_1P.fastq" \
+        "${SCRIPT_DIR}/processing/3_trimming/${base}_1U.fastq" \
+        "${SCRIPT_DIR}/processing/3_trimming/${base}_2P.fastq" \
+        "${SCRIPT_DIR}/processing/3_trimming/${base}_2U.fastq" \
         LEADING:20 TRAILING:20 SLIDINGWINDOW:4:20 MINLEN:50
 done
 
-mkdir data/processing/4_fastqc_trimmed
-mkdir data/processing/5_multiqc_trimmed
+# Run FastQC on trimmed data
+fastqc "${SCRIPT_DIR}/processing/3_trimming/"*fastq \
+    -o "${SCRIPT_DIR}/processing/4_fastqc_trimmed" \
+    -t "${THREADS}"
+multiqc "${SCRIPT_DIR}/processing/4_fastqc_trimmed" \
+    -o "${SCRIPT_DIR}/processing/5_multiqc_trimmed"
 
-fastqc data/processing/2_trimming/*fastq -o data/processing/4_fastqc_trimmed -t 32
-multiqc data/processing/4_fastqc_trimmed -o data/processing/5_multiqc_trimmed
+# Download reference data
+wget -O "${SCRIPT_DIR}/data/reference/C_parapsilosis_CDC317_current_chromosomes.fasta.gz" \
+    http://www.candidagenome.org/download/sequence/C_parapsilosis_CDC317/current/C_parapsilosis_CDC317_current_chromosomes.fasta.gz
+wget -O "${SCRIPT_DIR}/data/reference/C_parapsilosis_CDC317_current_features.gff" \
+    http://www.candidagenome.org/download/gff/C_parapsilosis_CDC317/C_parapsilosis_CDC317_current_features.gff
+gunzip -k "${SCRIPT_DIR}/data/reference/C_parapsilosis_CDC317_current_chromosomes.fasta.gz"
 
-mkdir data/reference
-wget -O data/reference/C_parapsilosis_CDC317_current_chromosomes.fasta.gz http://www.candidagenome.org/download/sequence/C_parapsilosis_CDC317/current/C_parapsilosis_CDC317_current_chromosomes.fasta.gz
-wget -O data/reference/C_parapsilosis_CDC317_current_features.gff http://www.candidagenome.org/download/gff/C_parapsilosis_CDC317/C_parapsilosis_CDC317_current_features.gff
-gunzip -k data/reference/C_parapsilosis_CDC317_current_chromosomes.fasta.gz
-
-mamba install -c bioconda star gffread
-STAR --runThreadN 32 --runMode genomeGenerate --genomeDir data/processing/6_indexing/ \
-     --genomeFastaFiles data/reference/C_parapsilosis_CDC317_current_chromosomes.fasta \
+# Generate STAR index
+STAR --runThreadN "${THREADS}" \
+     --runMode genomeGenerate \
+     --genomeDir "${SCRIPT_DIR}/processing/6_indexing/" \
+     --genomeFastaFiles "${SCRIPT_DIR}/data/reference/C_parapsilosis_CDC317_current_chromosomes.fasta" \
      --genomeSAindexNbases 10
-gffread data/reference/C_parapsilosis_CDC317_current_features.gff -T \
-        -o data/processing/6_indexing/C_parapsilosis_CDC317_current_features.gtf
 
+# Convert GFF to GTF
+gffread "${SCRIPT_DIR}/data/reference/C_parapsilosis_CDC317_current_features.gff" \
+    -T -o "${SCRIPT_DIR}/processing/6_indexing/C_parapsilosis_CDC317_current_features.gtf"
 
-mkdir data/processing/7_mapping
-for file in data/processing/0_fasterqdump/*_1.fastq; do
+# Run STAR mapping
+for file in "${SCRIPT_DIR}/processing/0_fasterqdump/"*_1.fastq; do
     base=$(basename "$file" _1.fastq)
-    STAR --runThreadN 32 --genomeDir data/processing/6_indexing \
-        --sjdbGTFfile data/processing/6_indexing/C_parapsilosis_CDC317_current_features.gtf \
-        --readFilesIn data/processing/2_trimming/${base}_1P.fastq \
-                      data/processing/2_trimming/${base}_2P.fastq \
-        --outFileNamePrefix data/processing/7_mapping/${base}_ --outSAMtype BAM \
-        SortedByCoordinate --limitBAMsortRAM 100000000000 \
+    STAR --runThreadN "${THREADS}" \
+        --genomeDir "${SCRIPT_DIR}/processing/6_indexing" \
+        --sjdbGTFfile "${SCRIPT_DIR}/processing/6_indexing/C_parapsilosis_CDC317_current_features.gtf" \
+        --readFilesIn "${SCRIPT_DIR}/processing/3_trimming/${base}_1P.fastq" \
+                      "${SCRIPT_DIR}/processing/3_trimming/${base}_2P.fastq" \
+        --outFileNamePrefix "${SCRIPT_DIR}/processing/7_mapping/${base}_" \
+        --outSAMtype BAM SortedByCoordinate \
+        --limitBAMsortRAM 100000000000 \
         --quantMode GeneCounts
 done
 
-multiqc data/processing/7_mapping -o data/processing/7_mapping
+# Generate mapping QC report
+multiqc "${SCRIPT_DIR}/processing/7_mapping" \
+    -o "${SCRIPT_DIR}/processing/7_mapping"
 
-# R scripting starts from here
-mamba install conda-forge::r-base
-mamba install -c bioconda bioconductor-deseq2 bioconductor-biocparallel bioconductor-clusterprofiler
-mamba install -c conda-forge r-ggpubr
+# Download GO annotations
+wget -O "${SCRIPT_DIR}/processing/9_gorich/gene_association.cgd.gz" \
+    http://www.candidagenome.org/download/go/gene_association.cgd.gz
+gunzip -k "${SCRIPT_DIR}/processing/9_gorich/gene_association.cgd.gz"
 
-mkdir data/processing/8_deseq
+# Switch to R environment and run analysis
+mamba deactivate
+mamba env create -f "${SCRIPT_DIR}/r-environment.yml" || true
+mamba activate rnaseq-r
 
-# download go annotations 
-mkdir data/processing/9_gorich
-wget -O data/processing/9_gorich/gene_association.cgd.gz http://www.candidagenome.org/download/go/gene_association.cgd.gz
-gunzip -k data/processing/9_gorich/gene_association.cgd.gz
-
-Rscript run_deseq.R
+# Run R analysis
+Rscript "${SCRIPT_DIR}/run_deseq.R"

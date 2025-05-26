@@ -1,0 +1,8 @@
+name: rnaseq-r
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - r-base=4.3.0
+  - r-essentials

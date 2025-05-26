@@ -1,3 +1,21 @@
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install(version = "3.18")
+
+# Install required packages
+BiocManager::install(c(
+    "DESeq2",
+    "BiocParallel",
+    "clusterProfiler",
+    "GenomeInfoDbData",
+    "GO.db"
+))
+
+if (!require("ggpubr"))
+    install.packages("ggpubr")
+
 library(DESeq2)
 library(ggpubr)
 library(clusterProfiler)

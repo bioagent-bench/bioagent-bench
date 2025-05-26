@@ -1,0 +1,12 @@
+name: rnaseq
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - sra-tools
+  - fastqc=0.12.1
+  - multiqc=1.27.1
+  - trimmomatic
+  - star
+  - gffread
