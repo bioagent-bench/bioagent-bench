@@ -1,0 +1,12 @@
+datasets:
+  alzheimer_mouse:
+    name: "Alzheimer Mouse Models"
+    description: "GEO studies examining different transgenic mouse models of Alzheimer's disease"
+    data_url: "https://osf.io/download/6833661cfe08c0f335d6a716/"
+    results_url: "https://osf.io/download/68336626b5864b789da4dc7f/"
+
+  viral_metagenomics:
+    name: "Viral Metagenomics"
+    description: "Real dataset from a study in dolphins, where fecal samples where prepared for viral metagenomics study."
+    data_url: "https://osf.io/download/6833945965db6dbb58d6a3c6/"
+    results_url: "https://osf.io/download/6833945c0c26956233a4db0e/"
