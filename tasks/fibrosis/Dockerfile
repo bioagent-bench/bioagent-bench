@@ -23,4 +23,4 @@ RUN chmod +x /app/docker_run_script.sh && \
 
 # Set entrypoint to run with conda environment
 ENTRYPOINT ["/bin/bash", "-l"]
-# CMD ["/app/docker_run_script.sh"] 
+CMD ["/app/docker_run_script.sh"] 
