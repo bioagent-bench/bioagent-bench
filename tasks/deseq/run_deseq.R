@@ -21,8 +21,10 @@ library(ggpubr)
 library(clusterProfiler)
 library(GO.db)
 
+# Set working directory to the data processing directory
+setwd("/app")
 
-setwd(".")
+# Read count data
 data <- NULL
 for (f in c("data/processing/7_mapping/SRR1278968_ReadsPerGene.out.tab",
             "data/processing/7_mapping/SRR1278969_ReadsPerGene.out.tab",
@@ -50,7 +52,6 @@ ggmaplot(res, main = "Differential expression in Biofilm vs Planktonic form",
     palette = c("red", "blue", "darkgray"),
     legend = "top", top = 0)
 ggsave("data/processing/8_deseq/maplot.png")
-
 
 norm_data<-vst(dds)
 plotPCA(norm_data,ntop=5000)
@@ -82,7 +83,6 @@ colnames(go_names) <- c("row.names(a)", "goterms")
 
 upreg_in_biofilm <- read.table("data/processing/8_deseq/up_regulated_genes.txt",header = FALSE)
 upreg_in_biofilm <- as.character(upreg_in_biofilm$V1)
-
 
 ego<-enricher(upreg_in_biofilm, universe = as.character(BP_universe$V2), TERM2GENE = BP_universe,TERM2NAME = go_names)
 
