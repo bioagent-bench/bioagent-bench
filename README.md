@@ -30,6 +30,20 @@ prompts for the humans reading this given below:
 for without reveleaing too much. This is not set in stone, edit it as you wish.
 2. Instruct: This is the goal of the analysis. Edit it as you wish.
 
+## Reproducing the pipelines
+If you really need to reproduce and check the results to do it you would run
+```bash
+cd tasks/<task-directory>
+```
+
+```bash
+docker build -t <task-name> .
+```
+
+```bash
+docker run -v "$(pwd)/:/app" <task-name>
+```
+
 ## Datasets and tasks
 
 ### Experimental evolution

@@ -11,6 +11,7 @@ tasks/*/*
 !tasks/*/run_script.sh
 !tasks/*/environment.yml
 !tasks/*/r-environment.yml
+!tasks/*/docker_run_script.sh
 
 # Task-specific allowed files
 !tasks/deseq/run_deseq.R
