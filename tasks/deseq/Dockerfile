@@ -1,38 +1,27 @@
-FROM condaforge/mambaforge:24.9.2-0
+# Use mambaforge as base image
+FROM condaforge/mambaforge:latest
 
+# Set working directory
 WORKDIR /app
 
-# Copy necessary files
-COPY run_script.sh /app/
-COPY run_deseq.R /app/
-COPY environment.yml /app/
-COPY r-environment.yml /app/
+# Copy your scripts and environment files
+COPY tasks/deseq/run_script.sh /app/
+COPY tasks/deseq/run_deseq.R /app/
+COPY tasks/deseq/environment.yml /app/
+COPY tasks/deseq/r-environment.yml /app/
 
-# Make the run script executable
-RUN chmod +x /app/run_script.sh
-
-# Initialize mamba
-RUN mamba init bash
-
-# Create the RNA-seq environment and install dependencies
-RUN mamba env create -f environment.yml && \
+# Initialize mamba for shell usage and create environments from yml files
+RUN mamba init bash && \
+    . ~/.bashrc && \
+    # Create the main environment from environment.yml
+    mamba env create -f environment.yml && \
+    # Create R environment from r-environment.yml
     mamba env create -f r-environment.yml && \
-    mamba clean -a -y
+    # Make script executable
+    chmod +x /app/run_script.sh
 
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y procps wget curl && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Set up R environment
-RUN mamba run -n rnaseq-r R -e 'options(repos = c(CRAN = "https://cloud.r-project.org")); if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager"); BiocManager::install(version = "3.18", ask = FALSE); BiocManager::install(c("DESeq2", "BiocParallel", "clusterProfiler", "GenomeInfoDbData", "GO.db"), ask = FALSE); if (!require("ggpubr")) install.packages("ggpubr", dependencies = TRUE)'
-
-# Set the shell to bash
-SHELL ["conda", "run", "-n", "rnaseq", "/bin/bash", "-c"]
-
-# Set the entrypoint to use bash with login shell (to ensure conda initialization)
-ENTRYPOINT ["/bin/bash", "-l", "-c"]
+# Set bash as the shell and source bashrc
+SHELL ["/bin/bash", "--login", "-c"]
 
 # Default command
-# CMD ["/app/run_script.sh"]
+CMD ["/app/run_script.sh"]

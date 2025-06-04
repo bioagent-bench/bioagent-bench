@@ -10,3 +10,5 @@ dependencies:
   - trimmomatic
   - star
   - gffread
+  - pydeseq2
+  - goatools
