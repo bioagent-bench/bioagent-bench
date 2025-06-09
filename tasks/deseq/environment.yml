@@ -12,3 +12,4 @@ dependencies:
   - gffread
   - pydeseq2
   - goatools
+  - pandas
