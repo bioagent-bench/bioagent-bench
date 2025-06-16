@@ -1,0 +1,7 @@
+name: t-quant
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - fastqc=0.12.1
+  - salmon=1.10.3
