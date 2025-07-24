@@ -5,11 +5,64 @@ library(SynExtend)
 cat("=== COMPARATIVE GENOMICS ANALYSIS DEBUG MODE ===\n")
 cat("Script started at:", as.character(Sys.time()), "\n\n")
 
-# Set working directory and check data
-setwd('.')
-COGExampleDir <- 'data'
+# For automated debugging runs, uncomment one of these lines:
+# resume_from_checkpoint <- TRUE  # Skip to Step 9.5 (filtering and tree building)
+# resume_from_prediction <- TRUE  # Skip to Step 14 (consensus annotations and predictions)
 
-cat("Step 1: Checking data directory...\n")
+# Check for intermediate checkpoint to resume from
+intermediate_file <- "./outputs/intermediate_step9.RData"
+prediction_checkpoint <- "./outputs/COG_trees_sequences_annotations.RData"
+resume_from_checkpoint <- FALSE
+resume_from_prediction <- FALSE
+
+if (file.exists(prediction_checkpoint)) {
+  cat("Found prediction checkpoint file:", prediction_checkpoint, "\n")
+  if (!resume_from_prediction) {
+    cat("Do you want to resume from Step 15 (EvoWeaver predictions)? [Y/n]: ")
+    # For automated runs, you can comment out the readline and set resume_from_prediction = TRUE
+    user_input <- readline()
+    if (tolower(trimws(user_input)) %in% c("", "y", "yes")) {
+      resume_from_prediction <- TRUE
+    }
+  }
+  
+  if (resume_from_prediction) {
+    cat("Resuming from prediction checkpoint...\n")
+    load(prediction_checkpoint)
+    cat("Loaded prediction checkpoint successfully.\n")
+    cat("Variables loaded: FilteredSequences, FilteredAnnots, COGTrees\n")
+    cat("Skipping to Step 14: Creating consensus annotations...\n\n")
+  } else {
+    cat("Checking for earlier checkpoint...\n")
+  }
+}
+
+if (!resume_from_prediction && file.exists(intermediate_file)) {
+  cat("Found intermediate checkpoint file:", intermediate_file, "\n")
+  cat("Do you want to resume from Step 9.5 (filtering and tree building)? [Y/n]: ")
+  # For automated runs, you can comment out the readline and set resume_from_checkpoint = TRUE
+  user_input <- readline()
+  if (tolower(trimws(user_input)) %in% c("", "y", "yes")) {
+    resume_from_checkpoint <- TRUE
+    cat("Resuming from checkpoint...\n")
+    load(intermediate_file)
+    cat("Loaded intermediate results successfully.\n")
+    cat("Variables loaded: GeneCalls, Syn, Overlaps, Pairs, COGSets,\n")
+    cat("                  MatchedCOGSets, MatchedSequences, Sequences, genomedirs\n")
+    cat("Skipping to Step 9.5: Early COG filtering...\n\n")
+  } else {
+    cat("Starting fresh analysis from the beginning...\n")
+  }
+} else if (!resume_from_prediction) {
+  cat("No intermediate checkpoint found. Starting fresh analysis...\n")
+}
+
+# Set working directory and check data (skip if resuming)
+if (!resume_from_checkpoint && !resume_from_prediction) {
+  setwd('.')
+  COGExampleDir <- 'data'
+
+  cat("Step 1: Checking data directory...\n")
 if (!dir.exists(COGExampleDir)) {
   stop("ERROR: Data directory '", COGExampleDir, "' does not exist!")
 }
@@ -22,6 +75,7 @@ cat("Database path:", DBPATH, "\n")
 cat("\nStep 2: Finding genome directories...\n")
 genomedirs <- list.files(COGExampleDir, full.names = TRUE)
 genomedirs <- genomedirs[grep('json', genomedirs, fixed=T, invert=T)]
+genomedirs <- genomedirs[grep('RData', genomedirs, fixed=T, invert=T)]
 cat("Found", length(genomedirs), "genome directories:\n")
 for (i in seq_along(genomedirs)) {
   cat("  ", i, ":", basename(genomedirs[i]), "\n")
@@ -97,47 +151,31 @@ tryCatch({
 
 cat("\nStep 6: Generating pair summaries...\n")
 tryCatch({
-  P01 <- PairSummaries(SyntenyLinks = Overlaps,
+  Pairs <- PairSummaries(SyntenyLinks = Overlaps,
                        GeneCalls = GeneCalls,
                        DBPATH = DBPATH,
                        PIDs = TRUE, 
                        Score = TRUE,
                        Verbose = TRUE,
                        processors=NULL)
-  cat("Pair summaries completed successfully, found", nrow(P01), "pairs\n")
+
+  P02 <- BlockExpansion(Pairs = Pairs,
+                      DBPATH = DBPATH,
+                      Verbose = TRUE,
+                      NewPairsOnly = FALSE)
+  P03 <- BlockReconciliation(Pairs = P02,
+                           PIDThreshold = 0.75,
+                           SCOREThreshold = 200,
+                           Verbose = TRUE)
+  Pairs <- P03[P03$PID > 0.4, ]
+  
+  cat("Pair summaries completed successfully, found", nrow(Pairs), "pairs\n")
 }, error = function(e) {
   cat("ERROR in PairSummaries:", e$message, "\n")
   stop("Failed at pair summaries step")
 })
 
-cat("\nStep 7: Block expansion...\n")
-tryCatch({
-  P02 <- BlockExpansion(Pairs = P01,
-                        DBPATH = DBPATH,
-                        Verbose = TRUE,
-                        NewPairsOnly = FALSE)
-  cat("Block expansion completed successfully, now have", nrow(P02), "pairs\n")
-}, error = function(e) {
-  cat("ERROR in BlockExpansion:", e$message, "\n")
-  stop("Failed at block expansion step")
-})
-
-cat("\nStep 8: Block reconciliation...\n")
-tryCatch({
-  P03 <- BlockReconciliation(Pairs = P02,
-                             PIDThreshold = 0.75,
-                             SCOREThreshold = 200,
-                             Verbose = TRUE)
-  cat("Block reconciliation completed successfully\n")
-  
-  Pairs <- P03[P03$PID > 0.4, ]
-  cat("After PID filtering (>0.4):", nrow(Pairs), "pairs remain\n")
-}, error = function(e) {
-  cat("ERROR in BlockReconciliation:", e$message, "\n")
-  stop("Failed at block reconciliation step")
-})
-
-cat("\nStep 9: Finding COGs (Clusters of Orthologous Groups)...\n")
+cat("\nStep 7: Finding COGs (Clusters of Orthologous Groups)...\n")
 tryCatch({
   COGSets <- DisjointSet(Pairs = Pairs,
                           Verbose = TRUE)
@@ -147,17 +185,17 @@ tryCatch({
   sizes <- lengths(COGSets)
   cat("COG size distribution:\n")
   cat("  Min:", min(sizes), "Max:", max(sizes), "Mean:", round(mean(sizes), 2), "\n")
-  cat("  COGs with ≥4 members:", sum(sizes >= 4), "\n")
+  cat("  COGs with ≥5 members:", sum(sizes >= 5), "\n")
 }, error = function(e) {
   cat("ERROR in DisjointSet:", e$message, "\n")
   stop("Failed at COG finding step")
 })
 
-cat("\nStep 10: Extracting sequences for large COGs...\n")
+cat("\nStep 8: Extracting sequences for large COGs...\n")
 tryCatch({
   # Extract sequences for COGs with at least 5 orthologs
-  largeCOGs <- COGSets[lengths(COGSets) >= 4]
-  cat("Extracting sequences for", length(largeCOGs), "COGs with ≥4 members\n")
+  largeCOGs <- COGSets[lengths(COGSets) >= 5]
+  cat("Extracting sequences for", length(largeCOGs), "COGs with ≥5 members\n")
   
   Sequences <- ExtractBy(x = Pairs,
                          y = DBPATH,
@@ -169,7 +207,7 @@ tryCatch({
   stop("Failed at sequence extraction step")
 })
 
-cat("\nStep 11: Matching COG sets with sequences...\n")
+cat("\nStep 9: Matching COG sets with sequences...\n")
 tryCatch({
   # These come back in different orders, so let's match them up
   allnames <- lapply(Sequences, names)
@@ -188,67 +226,65 @@ tryCatch({
   stop("Failed at COG matching step")
 })
 
-cat("\nStep 12: Building phylogenetic trees...\n")
+cat("\nStep 9.1: Saving intermediate results (before filtering)...\n")
 tryCatch({
-  # Build phylogenetic trees for each COG
-  # Create a list to store all the trees
-  COGTrees <- vector("list", length=length(MatchedSequences))
-  names(COGTrees) <- names(MatchedSequences)
-  
-  cat("Building trees for", length(MatchedSequences), "COGs\n")
-  
-  # Loop through each COG and build a tree
-  for (i in seq_along(MatchedSequences)) {
-    cat("Building tree", i, "of", length(MatchedSequences), "\n")
-    
-    tryCatch({
-      # Get the current COG sequences
-      currentCOG <- MatchedSequences[[i]]
-      
-      # Since these are coding regions, align using AlignTranslation
-      alignedCOG <- AlignTranslation(currentCOG)
-      
-      # Build a Maximum Likelihood tree with ancestral state reconstruction
-      # Using a reasonable time limit to balance accuracy and runtime
-      COGTrees[[i]] <- TreeLine(alignedCOG, 
-                               method = "ML",
-                               reconstruct = TRUE,
-                               maxTime = 0.05,
-                               processors=NULL)
-      
-    }, error = function(e) {
-      cat("WARNING: Failed to build tree for COG", i, ":", e$message, "\n")
-      COGTrees[[i]] <- NULL
-    })
+  # Create outputs directory if it doesn't exist
+  if (!dir.exists("./outputs")) {
+    dir.create("./outputs", recursive = TRUE)
   }
   
-  # Remove failed trees
-  successful_trees <- !sapply(COGTrees, is.null)
-  cat("Successfully built", sum(successful_trees), "trees out of", length(COGTrees), "attempted\n")
+  # Save all intermediate results up to this point (before filtering)
+  save(GeneCalls, Syn, Overlaps, Pairs, COGSets, MatchedCOGSets, 
+       MatchedSequences, Sequences, genomedirs,
+       file = "./outputs/intermediate_step9.RData")
   
+  cat("Successfully saved intermediate results to ./outputs/intermediate_step9.RData\n")
+  cat("You can resume from this point by loading this file if needed.\n")
 }, error = function(e) {
-  cat("ERROR in tree building:", e$message, "\n")
-  stop("Failed at tree building step")
+  cat("ERROR saving intermediate results:", e$message, "\n")
+  stop("Failed at saving intermediate results step")
 })
 
-cat("\nStep 13: Saving trees and sequences...\n")
+} # End of if (!resume_from_checkpoint) block
+
+# After Step 9 (before tree building):
+if (!resume_from_prediction) {
+cat("\nStep 9.5: Early COG filtering (sequence-based)...\n")
 tryCatch({
-  save(MatchedSequences, COGTrees, file = "COG_trees_and_sequences.RData")
-  cat("Successfully saved trees and sequences\n")
+  # Get assembly identifiers for each COG
+  truncCOGs <- lapply(MatchedSequences, function(x) sort(as.integer(gsub('^([0-9]+)_.*', '\\1', names(x)))))
+
+  
+  noParas <- sapply(truncCOGs, function(x) length(x) == length(unique(x)))
+  inFiveOrMore <- sapply(truncCOGs, function(x) length(unique(x)) <= 4)
+  
+  # Early filtering (combine all desired filters)
+  EarlyFiltered <- inFiveOrMore
+  
+  # Subset data before expensive tree building
+  PreFilteredSequences <- MatchedSequences[EarlyFiltered]
+  
+  cat("COGs before early filtering:", length(MatchedSequences), "\n")
+  cat("COGs after early filtering:", length(PreFilteredSequences), "\n")
+  cat("Breakdown of early filters:\n")
+  cat("  In 4 or less organisms:", sum(inFiveOrMore), "\n")
+  cat("  Combined filters passed:", sum(EarlyFiltered), "\n")
 }, error = function(e) {
-  cat("ERROR saving trees and sequences:", e$message, "\n")
-  stop("Failed at saving step")
+  cat("ERROR in early filtering:", e$message, "\n")
+  stop("Failed at early filtering step")
 })
 
-cat("\nStep 14: Functional annotation...\n")
+# Move functional annotation before tree building for better efficiency
+
+cat("\nStep 10: Functional annotation...\n")
 tryCatch({
   # Create a list to store all the annotations
-  CogsAnnot <- vector("list", length=length(MatchedSequences))
-  names(CogsAnnot) <- names(MatchedSequences)
+  CogsAnnot <- vector("list", length=length(PreFilteredSequences))
+  names(CogsAnnot) <- names(PreFilteredSequences)
   
   # Translate the sequences
   cat("Translating sequences...\n")
-  geneSeqs <- lapply(MatchedSequences, translate)
+  geneSeqs <- lapply(PreFilteredSequences, translate)
   
   # Load the training set for taxonomic classification
   cat("Loading training set...\n")
@@ -282,26 +318,9 @@ tryCatch({
   stop("Failed at functional annotation step")
 })
 
-cat("\nStep 15: Saving annotations...\n")
+cat("\nStep 11: Filtering COGs (annotation-based)...\n")
 tryCatch({
-  save(MatchedSequences, COGTrees, CogsAnnot, file = "COG_trees_sequences_annotations.RData")
-  cat("Successfully saved annotations\n")
-}, error = function(e) {
-  cat("ERROR saving annotations:", e$message, "\n")
-  stop("Failed at saving annotations step")
-})
-
-cat("\nStep 16: Filtering COGs...\n")
-tryCatch({
-  # Subsetting COGs based on specific criteria
-  # Get assembly identifiers for each COG
-  truncCOGs <- lapply(MatchedSequences, function(x) sort(as.integer(gsub('^([0-9]+)_.*', '\\1', names(x)))))
-  
-  # Find COGs without paralogs (each genome appears at most once)
-  noParas <- sapply(truncCOGs, function(x) length(x) == length(unique(x)))
-  
-  # Get genes in 4 or more organisms
-  inFourOrMore <- sapply(truncCOGs, function(x) length(unique(x)) >= 4)
+  # Apply annotation-based filters
   
   # Make sure COGs are coding elements
   codingCOGs <- sapply(CogsAnnot, function(x) is(x, 'Taxa'))
@@ -313,23 +332,33 @@ tryCatch({
                                   y$confidence[length(y$confidence)])) > 50
                      else FALSE
                      )
+
+  # Check for valid functional annotations (no NAs or poor annotations)
+  validAnnots <- sapply(CogsAnnot, function(x) {
+    if(!is(x, 'Taxa')) return(FALSE)  # Must be a Taxa object
+    
+    # Get all annotations
+    annots <- sapply(x, function(y) y$taxon[length(y$taxon)])
+    annots <- annots[annots != 'unclassified_Root']
+    
+    # Must have at least one good annotation
+    return(length(annots) > 0)
+  })
   
-  # Apply all filters
-  FilteredCOGs <- noParas & inFourOrMore & codingCOGs & highConf
+  # Apply annotation-based filters
+  FilteredCOGs <- codingCOGs & highConf & validAnnots
   
-  # Subset our data
-  FilteredSequences <- MatchedSequences[FilteredCOGs]
+  # Subset our data for final filtered set
+  FilteredSequences <- PreFilteredSequences[FilteredCOGs]
   FilteredAnnots <- CogsAnnot[FilteredCOGs]
-  FilteredTrees <- COGTrees[FilteredCOGs]
   
   # Print summary of filtering
-  cat("Original COGs:", length(MatchedSequences), "\n")
-  cat("COGs after filtering:", length(FilteredSequences), "\n")
-  cat("Breakdown of filters:\n")
-  cat("  No paralogs:", sum(noParas), "\n")
-  cat("  In 4+ organisms:", sum(inFourOrMore), "\n")
+  cat("COGs after early filtering (Step 9.5):", length(PreFilteredSequences), "\n")
+  cat("COGs after annotation filtering:", length(FilteredSequences), "\n")
+  cat("Breakdown of annotation filters:\n")
   cat("  Coding elements:", sum(codingCOGs), "\n")
   cat("  High confidence annotation:", sum(highConf), "\n")
+  cat("  Valid annotations:", sum(validAnnots), "\n")
   
   if (length(FilteredSequences) == 0) {
     stop("ERROR: No COGs passed all filtering criteria!")
@@ -340,57 +369,160 @@ tryCatch({
   stop("Failed at COG filtering step")
 })
 
-cat("\nStep 17: Saving filtered data...\n")
-tryCatch({
-  save(FilteredSequences, FilteredTrees, FilteredAnnots, file = "Filtered_COG_data.RData")
-  cat("Successfully saved filtered data\n")
-}, error = function(e) {
-  cat("ERROR saving filtered data:", e$message, "\n")
-  stop("Failed at saving filtered data step")
-})
-
-cat("\nStep 18: Creating consensus annotations...\n")
+cat("\nStep 12: Creating consensus annotations...\n")
 tryCatch({
   consAnnots <- vector('character', length=length(FilteredAnnots))
   for (i in seq_along(FilteredAnnots)) {
     taxaentry <- FilteredAnnots[[i]]
     
     # If no annotation, it's a noncoding gene
-    if (!is(taxaentry, 'Taxa'))
+    if (!is(taxaentry, 'Taxa')) {
       consAnnots[i] <- 'NONCODING'
+    }
     # Otherwise it's a coding gene
     else {
-      # Grab all the annotations aside from "Unclassified"
-      annots <- sapply(taxaentry, function(y) y$taxon[length(y$taxon)])
-      annots <- annots[annots != 'unclassified_Root']
+      # Extract all annotations with better error handling
+      all_annots <- character(0)
       
-      # If we only have "Unclassified", just mark it as uncharacterized
-      if (length(annots) == 0)
+      tryCatch({
+        # Get annotations from each sequence in the taxa entry
+        for (j in seq_along(taxaentry)) {
+          if (length(taxaentry[[j]]$taxon) > 0) {
+            # Get the most specific annotation (last element)
+            annotation <- taxaentry[[j]]$taxon[length(taxaentry[[j]]$taxon)]
+            if (!is.null(annotation) && !is.na(annotation) && annotation != "") {
+              all_annots <- c(all_annots, annotation)
+            }
+          }
+        }
+      }, error = function(e) {
+        cat("Warning: Error extracting annotations for COG", i, ":", e$message, "\n")
+      })
+      
+      # Filter annotations - keep unclassified only if it has meaningful text
+      filtered_annots <- character(0)
+      for (annot in all_annots) {
+        # Keep annotation if:
+        # 1. It's not unclassified_Root (too generic)
+        # 2. It's meaningful text (more than just "unclassified")
+        # 3. It's not empty or NA
+        
+        if (!is.na(annot) && annot != "" && annot != "unclassified_Root") {
+          # Allow unclassified annotations if they have additional meaningful text
+          if (grepl("unclassified", annot, ignore.case = TRUE)) {
+            # Keep if it has more than just "unclassified" (e.g., "unclassified Bacteria")
+            if (nchar(annot) > 12 && !grepl("^unclassified$", annot, ignore.case = TRUE)) {
+              filtered_annots <- c(filtered_annots, annot)
+            }
+          } else {
+            # Keep all non-unclassified annotations
+            filtered_annots <- c(filtered_annots, annot)
+          }
+        }
+      }
+      
+      # Assign consensus annotation
+      if (length(filtered_annots) == 0) {
         consAnnots[i] <- 'Uncharacterized'
+      } else {
+        # Take the most common meaningful annotation
+        annot_table <- table(filtered_annots)
+        consAnnots[i] <- names(sort(annot_table, decreasing=TRUE))[1]
+      }
       
-      # Otherwise take the most common annotation
-      else
-        consAnnots[i] <- names(sort(table(annots), decreasing=TRUE))[1]
+      # Additional debugging for first few COGs
+      if (i <= 3) {
+        cat("COG", i, "debug:\n")
+        cat("  Raw annotations found:", length(all_annots), "\n")
+        cat("  Filtered annotations:", length(filtered_annots), "\n")
+        cat("  Final annotation:", consAnnots[i], "\n")
+        if (length(filtered_annots) > 0) {
+          cat("  Top annotations:", paste(head(names(sort(table(filtered_annots), decreasing=TRUE)), 3), collapse=", "), "\n")
+        }
+      }
     }
   }
+  
+  # Summary of annotation results
   cat("Created consensus annotations for", length(consAnnots), "COGs\n")
+  annotation_summary <- table(consAnnots)
+  cat("Annotation summary:\n")
+  for (annot_type in names(sort(annotation_summary, decreasing=TRUE))) {
+    cat("  ", annot_type, ":", annotation_summary[annot_type], "\n")
+  }
+  
 }, error = function(e) {
   cat("ERROR creating consensus annotations:", e$message, "\n")
   stop("Failed at consensus annotation step")
 })
 
-cat("\nStep 19: Creating EvoWeaver object...\n")
+cat("\nStep 13: Building phylogenetic trees (final filtered set)...\n")
 tryCatch({
-  pw <- EvoWeaver(FilteredTrees)
+  # Build phylogenetic trees for each COG (using final filtered set)
+  # Create a list to store all the trees
+  COGTrees <- vector("list", length=length(FilteredSequences))
+  names(COGTrees) <- names(FilteredSequences)
+  
+  cat("Building trees for", length(FilteredSequences), "COGs (final filtered set)\n")
+  
+  # Loop through each COG and build a tree
+  for (i in seq_along(FilteredSequences)) {
+    cat("Building tree", i, "of", length(FilteredSequences), "\n")
+    
+    tryCatch({
+      # Get the current COG sequences
+      currentCOG <- FilteredSequences[[i]]
+      
+      # Since these are coding regions, align using AlignTranslation
+      alignedCOG <- AlignTranslation(currentCOG)
+      
+      # Build a tree with ancestral state reconstruction
+      # Using a reasonable time limit to balance accuracy and runtime
+      distMatrix <- DistanceMatrix(alignedCOG)
+      COGTrees[[i]] <- TreeLine(myDistMatrix=distMatrix, 
+                               myXStringSet=alignedCOG,
+                               method = "UPGMA",
+                               reconstruct = TRUE,
+                               processors=NULL)
+      
+    }, error = function(e) {
+      cat("WARNING: Failed to build tree for COG", i, ":", e$message, "\n")
+      COGTrees[[i]] <- NULL
+    })
+  }
+  
+  # Remove failed trees
+  successful_trees <- !sapply(COGTrees, is.null)
+  cat("Successfully built", sum(successful_trees), "trees out of", length(COGTrees), "attempted\n")
+  
+}, error = function(e) {
+  cat("ERROR in tree building:", e$message, "\n")
+  stop("Failed at tree building step")
+})
+
+cat("\nStep 14: Saving trees, sequences and annotations...\n")
+tryCatch({
+  save(FilteredSequences, FilteredAnnots, COGTrees, consAnnots, file = "./outputs/COG_trees_sequences_annotations.RData")
+  cat("Successfully saved trees, sequences and annotations to output/\n")
+}, error = function(e) {
+  cat("ERROR saving trees, sequences and annotations:", e$message, "\n")
+  stop("Failed at saving step")
+})
+
+} # End of if (!resume_from_prediction) block
+
+cat("\nStep 15: Creating EvoWeaver object...\n")
+tryCatch({
+  pw <- EvoWeaver(COGTrees)
   cat("EvoWeaver object created successfully\n")
 }, error = function(e) {
   cat("ERROR creating EvoWeaver object:", e$message, "\n")
   stop("Failed at EvoWeaver creation step")
 })
 
-cat("\nStep 20: Making predictions...\n")
+cat("\nStep 16: Making predictions...\n")
 tryCatch({
-  preds <- predict(pw)
+  preds <- predict(pw, Method="Jaccard")
   cat("Predictions completed successfully\n")
   print(preds)
 }, error = function(e) {
@@ -398,11 +530,10 @@ tryCatch({
   stop("Failed at prediction step")
 })
 
-cat("\nStep 21: Clustering analysis...\n")
+cat("\nStep 17: Clustering analysis...\n")
 tryCatch({
   # Find clusters of coevolving COGs using igraph
   library(igraph)
-  set.seed(123) # For reproducibility
   
   adjMatrix <- as.matrix(preds)
   g <- graph_from_adjacency_matrix(adjMatrix, weighted=TRUE,
@@ -428,16 +559,60 @@ tryCatch({
   stop("Failed at clustering step")
 })
 
-cat("\nStep 22: Saving final results...\n")
+cat("\nStep 18: Saving final results...\n")
 tryCatch({
-  save(preds, clusters, clusterLabels, consAnnots, file = "EvoWeaver_results.RData")
+  # Create results directory if it doesn't exist
+  if (!dir.exists("./results")) {
+    dir.create("./results", recursive = TRUE)
+  }
+  
+  save(preds, clusters, clusterLabels, consAnnots, file = "./results/EvoWeaver_results.RData")
   cat("Final results saved successfully\n")
 }, error = function(e) {
   cat("ERROR saving final results:", e$message, "\n")
   stop("Failed at saving final results step")
 })
 
-cat("\nStep 23: Generating final report...\n")
+cat("\nStep 19: Creating COG-to-cluster CSV mapping...\n")
+tryCatch({
+  # Create a data frame with COG information and cluster assignments
+  cog_cluster_df <- data.frame(
+    COG_ID = character(0),
+    Cluster_Number = integer(0),
+    Consensus_Annotation = character(0),
+    stringsAsFactors = FALSE
+  )
+  
+  # Get cluster membership for each COG
+  cluster_membership <- membership(clusters)
+  
+  # Create the mapping
+  for (i in seq_along(cluster_membership)) {
+    cog_id <- names(FilteredSequences)[i]
+    cluster_num <- cluster_membership[i]
+    annotation <- consAnnots[i]
+    
+    cog_cluster_df <- rbind(cog_cluster_df, data.frame(
+      COG_ID = cog_id,
+      Cluster_Number = cluster_num,
+      Consensus_Annotation = annotation,
+      stringsAsFactors = FALSE
+    ))
+  }
+  
+  # Sort by cluster number then by COG ID
+  cog_cluster_df <- cog_cluster_df[order(cog_cluster_df$Cluster_Number, cog_cluster_df$COG_ID), ]
+  
+  # Write to CSV
+  write.csv(cog_cluster_df, file = "./results/COG_cluster_mapping.csv", row.names = FALSE)
+  cat("Successfully created COG-to-cluster CSV mapping with", nrow(cog_cluster_df), "COGs\n")
+  cat("CSV saved to /results/COG_cluster_mapping.csv\n")
+}, error = function(e) {
+  cat("ERROR creating COG-to-cluster CSV:", e$message, "\n")
+  stop("Failed at CSV creation step")
+})
+
+cat("\nStep 20: Generating final report...\n")
 # Print information about the clusters
 cat("Number of clusters identified:", length(clusters), "\n")
 for (i in seq_along(clusterLabels)) {
@@ -458,4 +633,5 @@ for (i in seq_along(clusterLabels)) {
 
 cat("\n=== ANALYSIS COMPLETE ===\n")
 cat("Script completed successfully at:", as.character(Sys.time()), "\n")
-cat("Results saved to EvoWeaver_results.RData\n")
+cat("Results saved to /results/EvoWeaver_results.RData\n")
+cat("COG-to-cluster mapping saved to /results/COG_cluster_mapping.csv\n")
