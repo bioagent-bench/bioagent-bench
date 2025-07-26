@@ -88,12 +88,21 @@ The metagenomes that we will use were collected in Cuatro Ciénegas, in a study 
 https://www.ahl27.com/CompGenomicsBioc2022/articles/CompGenomicsBioc2022.html
 
 #### Data background
-The datasets consists FASTA sequences and GFF annotations of a microbial genome for Micrococcus. The main goal. The goal of is to do phylogenetic reconstruction of clusters of orthologous co-evolving genes. The COGs needs to be filtered based on the following quality criteria.
-1. No paralogs
-2. Clusters present in all 4 organisms
-3. Only present in the coding regions
-4. Must have at least 1 high confidence annotation
-The final result is clustering of the co-evolving genes into functional (annotated clusters)
+The datasets consists FASTA sequences and GFF annotations of a microbial genome for Micrococcus. The goal of is to do phylogenetic reconstruction of clusters of orthologous co-evolving genes; identify functionally conserved gene clusters across the genomes and group them into co-evolving functional modules. The COGs needs to be filtered based on the following quality criteria. 
+1. Clusters present in all 4 organisms
+2. Only present in the coding regions
+3. Must have at least 1 high confidence annotation
+The final result is clustering of the co-evolving genes into functional (annotated clusters) in the form of a .csv file with a "cluster_number" and "consensus_annotation" columns.
+The consensus_annotation column may contain a KEGG orthology ID (e.g., K07222) followed by a description.
+
+#### Goal
+The final result is clustering of the co-evolving genes into functional (annotated clusters) in the form of a .csv file with a "cluster_number" and "consensus_annotation" columns.
+The consensus_annotation column may contain a KEGG orthology ID (e.g., K07222) followed by a description.
+
+Your task is to always use the KEGG orthology ID (the code starting with 'K' followed by numbers) when referencing or summarizing annotations, not the longer description. If there are multiple K numbers, consider all of them but do not invent or merge their meanings beyond what is given.
+
+Example Output:
+1,"K07222 K07222, putative flavoprotein involved in K+ transport"
 
 ### Viral metagenomcis
 https://www.hadriengourle.com/tutorials/metavir/

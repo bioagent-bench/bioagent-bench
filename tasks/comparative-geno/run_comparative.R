@@ -5,64 +5,11 @@ library(SynExtend)
 cat("=== COMPARATIVE GENOMICS ANALYSIS DEBUG MODE ===\n")
 cat("Script started at:", as.character(Sys.time()), "\n\n")
 
-# For automated debugging runs, uncomment one of these lines:
-# resume_from_checkpoint <- TRUE  # Skip to Step 9.5 (filtering and tree building)
-# resume_from_prediction <- TRUE  # Skip to Step 14 (consensus annotations and predictions)
+# Set working directory and check data
+setwd('.')
+COGExampleDir <- 'data'
 
-# Check for intermediate checkpoint to resume from
-intermediate_file <- "./outputs/intermediate_step9.RData"
-prediction_checkpoint <- "./outputs/COG_trees_sequences_annotations.RData"
-resume_from_checkpoint <- FALSE
-resume_from_prediction <- FALSE
-
-if (file.exists(prediction_checkpoint)) {
-  cat("Found prediction checkpoint file:", prediction_checkpoint, "\n")
-  if (!resume_from_prediction) {
-    cat("Do you want to resume from Step 15 (EvoWeaver predictions)? [Y/n]: ")
-    # For automated runs, you can comment out the readline and set resume_from_prediction = TRUE
-    user_input <- readline()
-    if (tolower(trimws(user_input)) %in% c("", "y", "yes")) {
-      resume_from_prediction <- TRUE
-    }
-  }
-  
-  if (resume_from_prediction) {
-    cat("Resuming from prediction checkpoint...\n")
-    load(prediction_checkpoint)
-    cat("Loaded prediction checkpoint successfully.\n")
-    cat("Variables loaded: FilteredSequences, FilteredAnnots, COGTrees\n")
-    cat("Skipping to Step 14: Creating consensus annotations...\n\n")
-  } else {
-    cat("Checking for earlier checkpoint...\n")
-  }
-}
-
-if (!resume_from_prediction && file.exists(intermediate_file)) {
-  cat("Found intermediate checkpoint file:", intermediate_file, "\n")
-  cat("Do you want to resume from Step 9.5 (filtering and tree building)? [Y/n]: ")
-  # For automated runs, you can comment out the readline and set resume_from_checkpoint = TRUE
-  user_input <- readline()
-  if (tolower(trimws(user_input)) %in% c("", "y", "yes")) {
-    resume_from_checkpoint <- TRUE
-    cat("Resuming from checkpoint...\n")
-    load(intermediate_file)
-    cat("Loaded intermediate results successfully.\n")
-    cat("Variables loaded: GeneCalls, Syn, Overlaps, Pairs, COGSets,\n")
-    cat("                  MatchedCOGSets, MatchedSequences, Sequences, genomedirs\n")
-    cat("Skipping to Step 9.5: Early COG filtering...\n\n")
-  } else {
-    cat("Starting fresh analysis from the beginning...\n")
-  }
-} else if (!resume_from_prediction) {
-  cat("No intermediate checkpoint found. Starting fresh analysis...\n")
-}
-
-# Set working directory and check data (skip if resuming)
-if (!resume_from_checkpoint && !resume_from_prediction) {
-  setwd('.')
-  COGExampleDir <- 'data'
-
-  cat("Step 1: Checking data directory...\n")
+cat("Step 1: Checking data directory...\n")
 if (!dir.exists(COGExampleDir)) {
   stop("ERROR: Data directory '", COGExampleDir, "' does not exist!")
 }
@@ -245,10 +192,6 @@ tryCatch({
   stop("Failed at saving intermediate results step")
 })
 
-} # End of if (!resume_from_checkpoint) block
-
-# After Step 9 (before tree building):
-if (!resume_from_prediction) {
 cat("\nStep 9.5: Early COG filtering (sequence-based)...\n")
 tryCatch({
   # Get assembly identifiers for each COG
@@ -509,8 +452,6 @@ tryCatch({
   stop("Failed at saving step")
 })
 
-} # End of if (!resume_from_prediction) block
-
 cat("\nStep 15: Creating EvoWeaver object...\n")
 tryCatch({
   pw <- EvoWeaver(COGTrees)
@@ -573,13 +514,12 @@ tryCatch({
   stop("Failed at saving final results step")
 })
 
-cat("\nStep 19: Creating COG-to-cluster CSV mapping...\n")
+cat("\nStep 19: Creating cluster-to-annotation CSV mapping...\n")
 tryCatch({
-  # Create a data frame with COG information and cluster assignments
-  cog_cluster_df <- data.frame(
-    COG_ID = character(0),
-    Cluster_Number = integer(0),
-    Consensus_Annotation = character(0),
+  # Create a data frame with cluster assignments and KEGG annotations
+  cluster_annotation_df <- data.frame(
+    cluster_number = integer(0),
+    consensus_annotation = character(0),
     stringsAsFactors = FALSE
   )
   
@@ -588,27 +528,25 @@ tryCatch({
   
   # Create the mapping
   for (i in seq_along(cluster_membership)) {
-    cog_id <- names(FilteredSequences)[i]
     cluster_num <- cluster_membership[i]
     annotation <- consAnnots[i]
     
-    cog_cluster_df <- rbind(cog_cluster_df, data.frame(
-      COG_ID = cog_id,
-      Cluster_Number = cluster_num,
-      Consensus_Annotation = annotation,
+    cluster_annotation_df <- rbind(cluster_annotation_df, data.frame(
+      cluster_number = cluster_num,
+      consensus_annotation = annotation,
       stringsAsFactors = FALSE
     ))
   }
   
-  # Sort by cluster number then by COG ID
-  cog_cluster_df <- cog_cluster_df[order(cog_cluster_df$Cluster_Number, cog_cluster_df$COG_ID), ]
+  # Sort by cluster number then by annotation
+  cluster_annotation_df <- cluster_annotation_df[order(cluster_annotation_df$cluster_number, cluster_annotation_df$consensus_annotation), ]
   
   # Write to CSV
-  write.csv(cog_cluster_df, file = "./results/COG_cluster_mapping.csv", row.names = FALSE)
-  cat("Successfully created COG-to-cluster CSV mapping with", nrow(cog_cluster_df), "COGs\n")
-  cat("CSV saved to /results/COG_cluster_mapping.csv\n")
+  write.csv(cluster_annotation_df, file = "./results/cluster_annotation_mapping.csv", row.names = FALSE)
+  cat("Successfully created cluster-to-annotation CSV mapping with", nrow(cluster_annotation_df), "entries\n")
+  cat("CSV saved to /results/cluster_annotation_mapping.csv\n")
 }, error = function(e) {
-  cat("ERROR creating COG-to-cluster CSV:", e$message, "\n")
+  cat("ERROR creating cluster-to-annotation CSV:", e$message, "\n")
   stop("Failed at CSV creation step")
 })
 
@@ -634,4 +572,4 @@ for (i in seq_along(clusterLabels)) {
 cat("\n=== ANALYSIS COMPLETE ===\n")
 cat("Script completed successfully at:", as.character(Sys.time()), "\n")
 cat("Results saved to /results/EvoWeaver_results.RData\n")
-cat("COG-to-cluster mapping saved to /results/COG_cluster_mapping.csv\n")
+cat("Cluster-to-annotation mapping saved to /results/cluster_annotation_mapping.csv\n")

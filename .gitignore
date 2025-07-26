@@ -2,6 +2,7 @@
 .python-version
 uv.lock
 *.DS_Store
+.cursor/*
 
 # Ignore all files in task directories
 tasks/*/* 

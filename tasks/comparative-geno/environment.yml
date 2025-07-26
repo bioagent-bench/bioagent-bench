@@ -1,0 +1,11 @@
+name: comparative
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - r-base
+  - r-biocmanager
+  - bioconductor-decipher
+  - bioconductor-synextend
+  - r-igraph 
