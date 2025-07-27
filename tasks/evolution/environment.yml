@@ -1,0 +1,11 @@
+name: evolution
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - mamba
+  - wget
+  - tar
+  - pip
+  - setuptools 
