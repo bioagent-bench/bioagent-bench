@@ -1,0 +1,25 @@
+name: metagenomics
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - wget
+  - unzip
+  - gzip
+  
+  - fastqc=0.12.1
+  - multiqc=1.21
+  
+  - trimmomatic=0.39
+  - spades=4.0.0
+  - kraken2=2.1.3
+  - kraken-biom=1.2.0
+  
+  - r-base=4.3.2
+  - bioconductor-phyloseq=1.46.0
+  - r-ggplot2
+  - r-dplyr
+  - r-tidyr
+  - r-rcolorbrewer
+  - r-patchwork

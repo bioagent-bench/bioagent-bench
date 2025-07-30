@@ -22,7 +22,7 @@ library("patchwork")
 library("dplyr")
 library("tidyr")
 
-merged_metagenomes <- import_biom("data/processing/5_biom/cuatroc.biom")
+merged_metagenomes <- import_biom("outputs/5_biom/cuatroc.biom")
 
 merged_metagenomes@tax_table@.Data <- substring(merged_metagenomes@tax_table@.Data, 4)
 colnames(merged_metagenomes@tax_table@.Data)<- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
@@ -46,5 +46,5 @@ wide_percentages_df <- percentages_df %>%
     values_fill = 0 
   )
 
-write.csv(wide_percentages_df, "data/results/phylum_relative_abundances.csv", row.names = FALSE)
-ggsave("data/results/phylum_relative_abundances.pdf", relative_plot, width = 10, height = 6)
+write.csv(wide_percentages_df, "./results/phylum_relative_abundances.csv", row.names = FALSE)
+ggsave("./results/phylum_relative_abundances.pdf", relative_plot, width = 10, height = 6)
