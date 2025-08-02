@@ -14,6 +14,7 @@ dependencies:
   - scikit-learn
   - scipy
   - python-igraph
+  - openpyxl
   - pip
   - pip:
     - gzip-reader 

@@ -169,3 +169,10 @@ Perform a comparative analysis of three different Alzheimer's Disease mouse mode
 
 The output should be a CSV file with columns: Pathway, 5xFAD_pvalue, 3xTG_AD_pvalue, PS3O1S_pvalue, where each row represents a pathway found in all three models.
 
+### Single Cell RNA Seq
+https://github.com/evanpeikon/scRNA-seq-guide
+#### Data background
+The dataset consists of single-cell RNA sequencing data from human skeletal muscle samples collected before and after acute exercise. The data comes from a study examining cellular responses to exercise in human skeletal muscle, with samples from three subjects collected at pre-exercise and post-exercise timepoints. The sequencing was performed using 10X Genomics technology, generating sparse matrix files (matrix.mtx), cell barcodes (barcodes.tsv), and gene features (features.tsv) for each sample. This dataset enables investigation of how different cell types within skeletal muscle tissue respond to exercise at the single-cell level, revealing cell type-specific transcriptional changes that would be masked in bulk RNA-seq analysis.
+
+#### Goal
+The goal is to perform comprehensive single-cell RNA-seq analysis to identify cell types present in human skeletal muscle and characterize their specific responses to acute exercise. The analysis should include quality control, normalization, dimensionality reduction, clustering, cell type identification using marker genes, and differential expression analysis between pre- and post-exercise conditions within each cell type. The final output should be a CSV file containing all differentially expressed genes across cell types, with annotations indicating the predicted cell type for each cluster and the direction of expression changes in response to exercise.
