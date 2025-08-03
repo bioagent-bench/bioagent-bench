@@ -176,3 +176,9 @@ The dataset consists of single-cell RNA sequencing data from human skeletal musc
 
 #### Goal
 The goal is to perform comprehensive single-cell RNA-seq analysis to identify cell types present in human skeletal muscle and characterize their specific responses to acute exercise. The analysis should include quality control, normalization, dimensionality reduction, clustering, cell type identification using marker genes, and differential expression analysis between pre- and post-exercise conditions within each cell type. The final output should be a CSV file containing all differentially expressed genes across cell types, with annotations indicating the predicted cell type for each cluster and the direction of expression changes in response to exercise.
+
+### GIAB Variant Calling
+https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/NA12878_HG001/NISTv4.2.1/GRCh38/HG001_GRCh38_1_22_v4.2.1_benchmark.vcf.gz.tbi
+
+#### Data processing
+To minimize computational load while preserving mapping fidelity, we first aligned the entire NA12878 HiSeq 300 × read set to the full GRCh38 “no-alt” reference with BWA-MEM. Whole-genome alignment ensures that reads originating from repetitive or paralogous loci retain their correct genomic context, preventing misplacement onto homologous segments of chromosome 20. After alignment we extracted only those read pairs whose primary mapping coordinates fell within chr20 using samtools view, producing a chr20-specific BAM/FASTQ subset (~5 GB) suitable for rapid variant calling. This strategy retains the accuracy of a full-genome workflow while reducing data volume and runtime by more than an order of magnitude, enabling efficient benchmarking against GIAB’s high-confidence chr20 truth set.

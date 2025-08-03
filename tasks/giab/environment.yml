@@ -1,0 +1,12 @@
+name: giab
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bcftools
+  - tabix
+  - bwa
+  - samtools
+  - grep
+  - wget
+  - bash
