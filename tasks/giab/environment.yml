@@ -10,3 +10,7 @@ dependencies:
   - grep
   - wget
   - bash
+  - nextflow
+  - hap.py
+  - rtg-tools
+  - truvari

@@ -20,3 +20,5 @@ tasks/*/*
 !tasks/comparative-geno/run_comparative.R
 !tasks/alzheimer-mouse/run_analysis.py
 !tasks/fibrosis/family_tree_metadata.csv
+!tasks/giab/sarek_script.sh
+!tasks/giab/evaluate.sh
