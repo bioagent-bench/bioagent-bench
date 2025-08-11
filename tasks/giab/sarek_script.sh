@@ -15,7 +15,6 @@ PROFILE="docker"
 SAMPLE_ID="HG001_chr20"
 R1="$CWD/data/HG001_chr20_R1.fq.gz"
 R2="$CWD/data/HG001_chr20_R2.fq.gz"
-FASTA="$CWD/benchmark_ref/GRCh38_noalt.fa"
 THREADS=64
 
 mkdir -p "$OUTDIR" "$WORKDIR"
@@ -27,9 +26,10 @@ echo "${SAMPLE_ID},0,${SAMPLE_ID},lane_1,${R1},${R2}" >> "$SAMPLESHEET"
 set -x
 nextflow run nf-core/sarek -r "$SAREK_RELEASE" \
   -profile "$PROFILE" \
+  --genome GATK.GRCh38 \
   --input "$SAMPLESHEET" \
-  --fasta "$FASTA" \
   --analysis_type "germline" \
+  --tools deepvariant,haplotypecaller \
   --outdir "$OUTDIR" \
   --max_cpus "$THREADS" \
   --max_memory "120.GB" \
