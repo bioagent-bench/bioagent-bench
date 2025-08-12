@@ -1,10 +1,122 @@
 [
     {
+        "task_id": "alzheimer-mouse",
+        "name": "Alzheimer Mouse Models: Comparative Pathway Analysis",
+        "description": "Analyze 5xFAD, 3xTG-AD, and PS301S mouse models: normalize counts, perform differential expression, run KEGG pathway enrichment, and compare shared pathways across models.",
+        "download_urls": 
+            {
+                "data": ["https://osf.io/download/2e94t/"],
+                "reference_data": [""],
+                "results": ["https://osf.io/download/68336626b5864b789da4dc7f/"]
+            }   
+    },
+    {
+        "task_id": "comparative-genomics",
+        "name": "Comparative Genomics: Co-evolving Gene Clusters",
+        "description": "Reconstruct phylogeny and identify COGs across four Micrococcus genomes; filter clusters present in all genomes, coding-only, with high-confidence annotations; output functional modules CSV.",
+        "download_urls": 
+            {
+                "data": ["https://osf.io/download/nz3sq/"],
+                "reference_data": ["https://osf.io/download/688634a1c0fb9e14f4f27c3d/"],
+                "results": ["https://osf.io/download/6886330d335b56867ee7cc56/"]
+            }   
+    },
+    {
+        "task_id": "cystic-fibrosis",
+        "name": "Cystic Fibrosis Mendelian Variant Identification",
+        "description": "Simulated CEPH_1463 family sequencing with an added CF-causing mutation; identify the causal recessive variant consistent with affected siblings NA12885, NA12886, and NA12879.",
+        "download_urls": 
+            {
+                "data": ["https://osf.io/download/zafgd/"],
+                "reference_data": ["https://osf.io/download/68345adb08d1077918ab8378/"],
+                "results": ["https://osf.io/download/v8egn/"]
+            }   
+    },
+    {
+        "task_id": "deseq",
+        "name": "RNA-Seq Differential Expression (DESeq2)",
+        "description": "Candida parapsilosis wild-type in planktonic vs biofilm conditions; perform DESeq2 to identify genes significantly up- or down-regulated between conditions.",
+        "download_urls": 
+            {
+                "data": [
+                    "https://osf.io/download/68468fe0b8c35b8d7fd6a397/",
+                    "https://osf.io/download/68468dc10781da6500a4da4f/",
+                    "https://osf.io/download/68469352ccfa808c4bd6a429/",
+                    "https://osf.io/download/684694513564c1f16c85b2b5/",
+                    "https://osf.io/download/6846941a3564c1f16c85b2a7/"
+                ],
+                "reference_data": ["https://osf.io/download/6846a110c03eeac9d2a4da2e/"],
+                "results": ["https://osf.io/download/6846a111dfcfcd74e2ab813b/"]
+            }   
+    },
+    {
         "task_id": "evolution",
-        "name": "E.Coli Directed Evolution Experiment",
-        "description": "This is an example task",
-        "num_bio_tools": 14,
-        "num_packages": 3,
-        "download_urls": "https://osf.io/2jc4a/download"
+        "name": "Experimental Evolution Variant Calling (E. coli)",
+        "description": "Identify and annotate genome variants in two evolved lines relative to an ancestor; report only variants shared by both evolved lines.",
+        "download_urls": 
+            {
+                "data": ["https://osf.io/download/688a14249d739c43eda23e55/"],
+                "reference_data": [""],
+                "results": ["https://osf.io/download/688a0db3222020edd0e7cc66/"]
+            }   
+    },
+    {
+        "task_id": "giab",
+        "name": "GIAB Variant Calling (NA12878 chr20 subset)",
+        "description": "Call variants on the chr20 subset of NA12878 aligned to GRCh38 and benchmark against GIAB high-confidence truth set.",
+        "download_urls": 
+            {
+                "data": ["https://osf.io/download/6899de6a89c5a2f6a6b067dc/"],
+                "reference_data": [""],
+                "results": ["https://osf.io/download/6899dea3ba5b02dca96b0c8a/"]
+            }   
+    },
+    {
+        "task_id": "metagenomics",
+        "name": "Metagenomics: Community Comparison (Cuatro Ciénegas)",
+        "description": "Compare microbial communities between control microcosm JC1A and fertilized pond JP4D to assess effects of nutrient enrichment.",
+        "download_urls": 
+            {
+                "data": ["https://osf.io/download/688c83477fecfec1cea2406c/"],
+                "reference_data": [""],
+                "results": ["https://osf.io/download/688c803bf191a05eb312ff76/"]
+            }   
+    },
+    {
+        "task_id": "single-cell",
+        "name": "Single-cell RNA-seq: Skeletal Muscle Exercise Response",
+        "description": "10x Genomics data pre- and post-exercise; QC, normalization, dimensionality reduction, clustering, cell type identification, and differential expression per cell type with aggregated output.",
+        "download_urls": 
+            {
+                "data": [""],
+                "reference_data": [""],
+                "results": [""]
+            }   
+    },
+    {
+        "task_id": "transcript-quant",
+        "name": "Transcript Quantification (Simulated RNA-Seq)",
+        "description": "Quantify transcripts from paired-end reads against the provided transcriptome; simulated dataset of 582 transcripts from 66 genes with goal of exact read count matches.",
+        "download_urls": 
+            {
+                "data": ["https://osf.io/download/688e6ed133700f5303c358dd/"],
+                "reference_data": ["https://osf.io/download/688e6d05f99f6f9bdec3570d/"],
+                "results": ["https://osf.io/download/688e6d080f937c7ae34cac28/"]
+            }   
+    },
+    {
+        "task_id": "viral-metagenomics",
+        "name": "Viral Metagenomics: Species Identification (Dolphin)",
+        "description": "Identify viral species present in a dolphin fecal sample from paired-end reads; output CSV with contig_count, domain, and species.",
+        "download_urls": 
+            {
+                "data": ["https://osf.io/download/6833945965db6dbb58d6a3c6/"],
+                "reference_data": [
+                    "https://osf.io/download/683423565d0944b2b685b1bd/",
+                    "https://osf.io/download/6833926d0c80ee431a85b55e/"
+                ],
+                "results": ["https://osf.io/download/6833945c0c26956233a4db0e/"]
+            }   
     }
 ]
+
