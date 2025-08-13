@@ -21,5 +21,5 @@ tasks/*/*
 !tasks/alzheimer-mouse/run_analysis.py
 !tasks/fibrosis/family_tree_metadata.csv
 !tasks/giab/sarek_script.sh
-!tasks/giab/evaluate_script.sh
+!tasks/giab/eval_script.sh
 !tasks/giab/preprocess_script.sh
