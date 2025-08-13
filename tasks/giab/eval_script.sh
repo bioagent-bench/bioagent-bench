@@ -70,7 +70,6 @@ run_happy_eval() {
         -T "$BED_FILE" \
         -r "$REF_FASTA" \
         -o "$output_prefix" \
-        --engine=vcfeval \
         --pass-only \
         --verbose
     
