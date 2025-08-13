@@ -3,14 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bcftools
-  - tabix
-  - bwa
-  - samtools
-  - grep
-  - wget
-  - bash
   - nextflow
-  - hap.py
-  - rtg-tools
-  - truvari
