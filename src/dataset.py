@@ -75,14 +75,22 @@ class BioAgentDataset:
             return False
     
     def _extract_tarfile(self, tar_path: Path) -> None:
-        """Extract tar archive to the same directory (auto-detect compression)."""
-        extract_dir = tar_path.parent
-        print(f"Extracting {tar_path} to {extract_dir}")
+        """Extract tar archive contents directly to the archive's directory and delete the archive."""
+        output_dir = tar_path.parent
+        
+        print(f"Extracting {tar_path} to {output_dir}")
         
         try:
             with tarfile.open(tar_path, 'r:*') as tar:
-                tar.extractall(path=extract_dir)
-            print(f"Successfully extracted {tar_path}")
+                for member in tar.getmembers():
+                    if member.isfile():
+                        member.name = Path(member.name).name
+                        tar.extract(member, path=output_dir)
+            
+            tar_path.unlink()
+            print(f"Removed archive: {tar_path}")
+            print(f"Successfully extracted {tar_path} to {output_dir}")
+            
         except Exception as e:
             print(f"Error extracting {tar_path}: {e}")
     
