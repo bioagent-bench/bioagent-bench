@@ -67,10 +67,6 @@ uv run python src/dataset.py download --task giab --results --no-data --no-refer
 uv run python src/dataset.py download-all-results
 ```
 
-- **Customize metadata path**
-```bash
-uv run python src/dataset.py --metadata src/task_metadata.json list-tasks
-```
 
 Files are downloaded under `tasks/<task_id>/`:
 - `data/` for input datasets
