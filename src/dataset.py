@@ -3,7 +3,7 @@ import tarfile
 from pathlib import Path
 from urllib.parse import urlparse
 import requests
-from typing import List
+from typing import List, Union, Dict
 import click
 
 
@@ -62,8 +62,8 @@ class BioAgentDataset:
                             continue
                         f.write(chunk)
             
-            # Auto-extract tar.gz files
-            if output_path.name.endswith('.tar.gz'):
+            # Auto-extract tar archives if detected (handles .tar.gz, .tgz, .tar)
+            if tarfile.is_tarfile(output_path):
                 self._extract_tarfile(output_path)
                 
             return True
@@ -75,34 +75,52 @@ class BioAgentDataset:
             return False
     
     def _extract_tarfile(self, tar_path: Path) -> None:
-        """Extract tar.gz file to the same directory."""
+        """Extract tar archive to the same directory (auto-detect compression)."""
         extract_dir = tar_path.parent
         print(f"Extracting {tar_path} to {extract_dir}")
         
         try:
-            with tarfile.open(tar_path, 'r:gz') as tar:
+            with tarfile.open(tar_path, 'r:*') as tar:
                 tar.extractall(path=extract_dir)
             print(f"Successfully extracted {tar_path}")
         except Exception as e:
             print(f"Error extracting {tar_path}: {e}")
     
-    def _download_urls(self, urls: List[str], target_dir: Path, category: str) -> bool:
-        """Download multiple URLs to target directory."""
+    def _download_urls(self, urls: List[Union[str, Dict[str, str]]], target_dir: Path, category: str) -> bool:
+        """Download multiple URLs to target directory.
+
+        Supports plain URL strings or objects with keys {"filename", "url"}.
+        """
         if not urls:
             print(f"No {category} URLs to download")
             return True
             
         success = True
-        for i, url in enumerate(urls):
-            if not url or url.strip() == "":
+        for i, entry in enumerate(urls):
+            url: str = ""
+            filename: str = ""
+
+            if isinstance(entry, str):
+                url = entry.strip()
+                if not url:
+                    continue
+                parsed_url = urlparse(url)
+                filename = Path(parsed_url.path).name
+            elif isinstance(entry, dict):
+                url = (entry.get("url") or "").strip()
+                filename = (entry.get("filename") or "").strip()
+                if not filename and url:
+                    parsed_url = urlparse(url)
+                    filename = Path(parsed_url.path).name
+            else:
                 continue
-                
-            # Generate filename from URL or use index-based naming
-            parsed_url = urlparse(url)
-            filename = Path(parsed_url.path).name
+
             if not filename:
                 filename = f"{category}_{i}.tar.gz"
-                
+
+            if not url:
+                continue
+
             output_path = target_dir / filename
             if not self._download_file(url, output_path):
                 success = False
