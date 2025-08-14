@@ -66,9 +66,9 @@
         "description": "Call variants on the chr20 subset of NA12878 aligned to GRCh38 and benchmark against GIAB high-confidence truth set.",
         "download_urls": 
             {
-                "data": ["https://osf.io/download/6899de6a89c5a2f6a6b067dc/"],
-                "reference_data": [""],
-                "results": ["https://osf.io/download/6899dea3ba5b02dca96b0c8a/"]
+                "data": ["https://osf.io/download/689d9ecdf1ebb97673bc0ca7/"],
+                "reference_data": ["https://osf.io/download/689ca8f0f375f799101f201d/"],
+                "results": ["https://osf.io/download/689caa007283d4d1371f1f5a/"]
             }   
     },
     {
