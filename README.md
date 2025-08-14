@@ -15,17 +15,74 @@ Benchmark for evaluating LLM agents in bioinformatics
   - **run_pyscript.R**: Sometimes there is a Python downstream analysis
 
 # General instructions
+### CLI: dataset downloader
+Use the Click-based CLI in `src/dataset.py` to list tasks and download data, reference files, and results.
+
+- **Install uv (if not installed)**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+- **Create a virtual environment and install dependencies**
+```bash
+uv sync
+```
+
+- **Show help**
+```bash
+uv run python src/dataset.py --help
+```
+
+- **List available tasks**
+```bash
+uv run python src/dataset.py list-tasks
+```
+
+- **Download a single task's data**
+```bash
+uv run python src/dataset.py download --task giab
+```
+
+- **Download multiple tasks**
+```bash
+uv run python src/dataset.py download --task giab --task deseq --task metagenomics
+```
+
+- **Download all tasks**
+```bash
+uv run python src/dataset.py download --all
+```
+
+- **Include reference files**
+```bash
+uv run python src/dataset.py download --task giab --reference
+```
+
+- **Download results only**
+```bash
+# For specific tasks
+uv run python src/dataset.py download --task giab --results --no-data --no-reference
+
+# For all tasks
+uv run python src/dataset.py download-all-results
+```
+
+- **Customize metadata path**
+```bash
+uv run python src/dataset.py --metadata src/task_metadata.json list-tasks
+```
+
+Files are downloaded under `tasks/<task_id>/`:
+- `data/` for input datasets
+- `reference/` for reference data when `--reference` is used
+- `results/` for evaluation result files when `--results` or `download-all-results` is used
+
 ## Some general ideas about the benchmark
-In ideal case you should only care about the src/ folder where you can download the input files, analyze,
-eval them against "truth" files. Different software, versions, assumptions will produce different results.
-Where there is consensus actual ground truth like in GIAB (Genome in a bottle) or simulated data we can 
-produce eval metrics. In other cases we evaluate against correctness of output and try to see if there are 
-at least some overlapping outputs. 
+In ideal case you should only care about the src/ folder where you can download the input files, analyze, eval them against "truth" files. Different software, versions, assumptions will produce different results. Where there is consensus actual ground truth like in GIAB (Genome in a bottle) or simulated data we can  produce eval metrics. In other cases we evaluate against correctness of output and try to see if there are at least some overlapping outputs. 
 > **DISCLAIMER:** Do not expect "Truth" files or evals to be correct unless explicitly stated.
 
 ## What is allowed?
-Obviously don't prompt the LLM with the scripts used for reproducing the eval files. We have written two
-prompts for the humans reading this given below:
+Obviously don't prompt the LLM with the scripts used for reproducing the eval files. We have written two prompts for the humans reading this given below:
 1. Data background: Start prompting with this to give some background. This is what it was written
 for without reveleaing too much. This is not set in stone, edit it as you wish.
 2. Instruct: This is the goal of the analysis. Edit it as you wish.

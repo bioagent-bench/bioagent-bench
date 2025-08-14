@@ -1,8 +1,10 @@
 [project]
 name = "bio-agent-benchmark"
 version = "0.1.0"
-description = "Add your description here"
+description = "Tasks for benchmarking agentic LLMs in bioinformatics tasks"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "click>=8.1.7",
+    "requests>=2.32.4",
 ]

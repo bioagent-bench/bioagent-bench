@@ -88,9 +88,9 @@
         "description": "10x Genomics data pre- and post-exercise; QC, normalization, dimensionality reduction, clustering, cell type identification, and differential expression per cell type with aggregated output.",
         "download_urls": 
             {
-                "data": [""],
-                "reference_data": [""],
-                "results": [""]
+                "data": ["https://osf.io/download/688e6ed133700f5303c358dd/"],
+                "reference_data": ["https://osf.io/download/688e6d05f99f6f9bdec3570d/"],
+                "results": ["https://osf.io/download/688e6d080f937c7ae34cac28/"]
             }   
     },
     {
