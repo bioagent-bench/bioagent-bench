@@ -150,11 +150,11 @@
         "download_urls": 
             {
                 "data": [{
-                    "filename": "data.tar.gz", "url": "https://osf.io/download/688e6ed133700f5303c358dd/"
+                    "filename": "data.tar.gz", "url": "https://osf.io/download/684fefc97139f9f5536df7a8/"
                 }],
                 "reference_data": [],
                 "results": [{
-                    "filename": "results.tar.gz", "url": "https://osf.io/download/688e6d080f937c7ae34cac28/"
+                    "filename": "results.tar.gz", "url": "https://osf.io/download/684fefc073a328e5cbb689c8/"
                 }]
             }   
     },
