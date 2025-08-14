@@ -44,9 +44,23 @@ class BioAgentDataset:
             response = requests.get(url, stream=True)
             response.raise_for_status()
             
+            total_size_str = response.headers.get('Content-Length')
+            total_size = int(total_size_str) if total_size_str and total_size_str.isdigit() else 0
+
             with open(output_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
+                if total_size > 0:
+                    label = f"Downloading {output_path.name}"
+                    with click.progressbar(length=total_size, label=label, show_eta=True, show_percent=True) as bar:
+                        for chunk in response.iter_content(chunk_size=8192):
+                            if not chunk:
+                                continue
+                            f.write(chunk)
+                            bar.update(len(chunk))
+                else:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        if not chunk:
+                            continue
+                        f.write(chunk)
             
             # Auto-extract tar.gz files
             if output_path.name.endswith('.tar.gz'):
