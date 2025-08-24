@@ -3,18 +3,18 @@ import tarfile
 from pathlib import Path
 from urllib.parse import urlparse
 import requests
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Optional
 import click
 
 
 class BioAgentDataset:
     """Download and manage bioinformatics benchmark datasets."""
     
-    def __init__(self, metadata_path: str = "src/task_metadata.json"):
+    def __init__(self, metadata_path: str = "src/task_metadata.json", base_dir: Union[str, Path] = "tasks"):
         """Initialize with path to task metadata JSON file."""
         self.metadata_path = Path(metadata_path)
         self.tasks = self._load_metadata()
-        self.base_dir = Path("tasks")
+        self.base_dir = Path(base_dir)
     
     def _load_metadata(self) -> List[dict]:
         """Load task metadata from JSON file."""
@@ -212,10 +212,16 @@ class BioAgentDataset:
     show_default=True,
     help="Path to task metadata JSON file.",
 )
+@click.option(
+    "--dest",
+    default="tasks",
+    show_default=True,
+    help="Base output directory where task folders will be created.",
+)
 @click.pass_context
-def cli(ctx: click.Context, metadata: str) -> None:
+def cli(ctx: click.Context, metadata: str, dest: str) -> None:
     """BioAgent dataset manager."""
-    ctx.obj = BioAgentDataset(metadata_path=metadata)
+    ctx.obj = BioAgentDataset(metadata_path=metadata, base_dir=dest)
 
 
 @cli.command("list-tasks")
@@ -242,6 +248,11 @@ def cli_list_tasks(dataset: BioAgentDataset) -> None:
     show_default=True,
     help="Include results files.",
 )
+@click.option(
+    "--dest",
+    default=None,
+    help="Base output directory where task folders will be created.",
+)
 @click.pass_obj
 def cli_download(
     dataset: BioAgentDataset,
@@ -250,8 +261,11 @@ def cli_download(
     data: bool,
     reference: bool,
     results: bool,
+    dest: Optional[str],
 ) -> None:
     """Download datasets for tasks (data, reference, results)."""
+    if dest:
+        dataset.base_dir = Path(dest)
     if not download_all and not task_ids:
         click.echo("Specify at least one --task or use --all", err=True)
         raise SystemExit(1)
@@ -280,9 +294,16 @@ def cli_download(
 
 
 @cli.command("download-all-results")
+@click.option(
+    "--dest",
+    default=None,
+    help="Base output directory where task folders will be created.",
+)
 @click.pass_obj
-def cli_download_all_results(dataset: BioAgentDataset) -> None:
+def cli_download_all_results(dataset: BioAgentDataset, dest: Optional[str]) -> None:
     """Download results for all tasks."""
+    if dest:
+        dataset.base_dir = Path(dest)
     ok = dataset.download_all_results()
     raise SystemExit(0 if ok else 1)
 

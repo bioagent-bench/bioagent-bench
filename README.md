@@ -50,7 +50,7 @@ uv run python src/dataset.py download --task giab --task deseq --task metagenomi
 
 - **Download all tasks**
 ```bash
-uv run python src/dataset.py download --all
+uv run python src/dataset.py download --all --dest /path/to/output/
 ```
 
 - **Include reference files**
