@@ -1,182 +1,262 @@
 [
-    {
-        "task_id": "alzheimer-mouse",
-        "name": "Alzheimer Mouse Models: Comparative Pathway Analysis",
-        "description": "Analyze 5xFAD, 3xTG-AD, and PS301S mouse models: normalize counts, perform differential expression, run KEGG pathway enrichment, and compare shared pathways across models.",
-        "download_urls": 
-            {
-                "data": [{
-                    "filename": "data.tar.gz", "url": "https://osf.io/download/2e94t/"
-                }],
-                "reference_data": [],
-                "results": [{
-                    "filename": "results.tar.gz", "url": "https://osf.io/download/68336626b5864b789da4dc7f/"
-                }]
-            }   
-    },
-    {
-        "task_id": "comparative-genomics",
-        "name": "Comparative Genomics: Co-evolving Gene Clusters",
-        "description": "Reconstruct phylogeny and identify COGs across four Micrococcus genomes; filter clusters present in all genomes, coding-only, with high-confidence annotations; output functional modules CSV.",
-        "download_urls": 
-            {
-                "data": [{
-                    "filename": "data.tar.gz", "url": "https://osf.io/download/nz3sq/"
-                }],
-                "reference_data": [{
-                    "filename": "actinobacteria.tar.gz", "url": "https://osf.io/download/688634a1c0fb9e14f4f27c3d/"
-                }],
-                "results": [{
-                    "filename": "results.tar.gz", "url": "https://osf.io/download/6886330d335b56867ee7cc56/"
-                }]
-            }   
-    },
-    {
-        "task_id": "cystic-fibrosis",
-        "name": "Cystic Fibrosis Mendelian Variant Identification",
-        "description": "Simulated CEPH_1463 family sequencing with an added CF-causing mutation; identify the causal recessive variant consistent with affected siblings NA12885, NA12886, and NA12879.",
-        "download_urls": 
-            {
-                "data": [{
-                    "filename": "data.tar.gz", "url": "https://osf.io/download/zafgd/"
-                }],
-                "reference_data": [{
-                    "filename": "clinvar_20250521.vcf.gz", "url": "https://osf.io/download/68345adb08d1077918ab8378/"
-                }],
-                "results": [{
-                    "filename": "results.tar.gz", "url": "https://osf.io/download/v8egn/"
-                }]
-            }   
-    },
-    {
-        "task_id": "deseq",
-        "name": "RNA-Seq Differential Expression (DESeq2)",
-        "description": "Candida parapsilosis wild-type in planktonic vs biofilm conditions; perform DESeq2 to identify genes significantly up- or down-regulated between conditions.",
-        "download_urls": 
-            {
-                "data": [
-                    {
-                        "filename": "SRR1278968.tar.gz", "url": "https://osf.io/download/68468fe0b8c35b8d7fd6a397/"
-                    },
-                    {
-                        "filename": "SRR1278969.tar.gz", "url": "https://osf.io/download/68468dc10781da6500a4da4f/"
-                    },
-                    {
-                        "filename": "SRR1278970.tar.gz", "url": "https://osf.io/download/68469352ccfa808c4bd6a429/"
-                    },
-                    {
-                        "filename": "SRR1278971.tar.gz", "url": "https://osf.io/download/684694513564c1f16c85b2b5/"
-                    },
-                    {
-                        "filename": "SRR1278972.tar.gz", "url": "https://osf.io/download/6846941a3564c1f16c85b2a7/"
-                    }
-                ],
-                "reference_data": [{
-                    "filename": "reference.tar.gz", "url": "https://osf.io/download/6846a110c03eeac9d2a4da2e/"
-                }],
-                "results": [{
-                    "filename": "results.tar.gz", "url": "https://osf.io/download/6846a111dfcfcd74e2ab813b/"
-                }]
-            }   
-    },
-    {
-        "task_id": "evolution",
-        "name": "Experimental Evolution Variant Calling (E. coli)",
-        "description": "Identify and annotate genome variants in two evolved lines relative to an ancestor; report only variants shared by both evolved lines.",
-        "download_urls": 
-            {
-                "data": [{
-                    "filename": "data.tar.gz", "url": "https://osf.io/download/688a14249d739c43eda23e55/"
-                }],
-                "reference_data": [],
-                "results": [{
-                    "filename": "results.tar.gz", "url": "https://osf.io/download/688a0db3222020edd0e7cc66/"
-                }]
-            }   
-    },
-    {
-        "task_id": "giab",
-        "name": "GIAB Variant Calling (NA12878 chr20 subset)",
-        "description": "Call variants on the chr20 subset of NA12878 aligned to GRCh38 and benchmark against GIAB high-confidence truth set.",
-        "download_urls": 
-            {
-                "data": [{
-                    "filename": "data.tar.gz", "url": "https://osf.io/download/689d9ecdf1ebb97673bc0ca7/"
-                }],
-                "reference_data": [{
-                    "filename": "reference.tar.gz", "url": "https://osf.io/download/689ca8f0f375f799101f201d/"
-                }],
-                "results": [{
-                    "filename": "results.tar.gz", "url": "https://osf.io/download/689caa007283d4d1371f1f5a/"
-                }]
-            }   
-    },
-    {
-        "task_id": "metagenomics",
-        "name": "Metagenomics: Community Comparison (Cuatro Ciénegas)",
-        "description": "Compare microbial communities between control microcosm JC1A and fertilized pond JP4D to assess effects of nutrient enrichment.",
-        "download_urls": 
-            {
-                "data": [{
-                    "filename": "data.tar.gz", "url": "https://osf.io/download/688c83477fecfec1cea2406c/"
-                }],
-                "reference_data": [],
-                "results": [{
-                    "filename": "results.tar.gz", "url": "https://osf.io/download/688c803bf191a05eb312ff76/"
-                }]
-            }   
-    },
-    {
-        "task_id": "single-cell",
-        "name": "Single-cell RNA-seq: Skeletal Muscle Exercise Response",
-        "description": "10x Genomics data pre- and post-exercise; QC, normalization, dimensionality reduction, clustering, cell type identification, and differential expression per cell type with aggregated output.",
-        "download_urls": 
-            {
-                "data": [{
-                    "filename": "data.tar.gz", "url": "https://osf.io/download/688e6ed133700f5303c358dd/"
-                }],
-                "reference_data": [{
-                    "filename": "reference.tar.gz", "url": "https://osf.io/download/688e6d05f99f6f9bdec3570d/"
-                }],
-                "results": [{
-                    "filename": "results.tar.gz", "url": "https://osf.io/download/688e6d080f937c7ae34cac28/"
-                }]
-            }   
-    },
-    {
-        "task_id": "transcript-quant",
-        "name": "Transcript Quantification (Simulated RNA-Seq)",
-        "description": "Quantify transcripts from paired-end reads against the provided transcriptome; simulated dataset of 582 transcripts from 66 genes with goal of exact read count matches.",
-        "download_urls": 
-            {
-                "data": [{
-                    "filename": "data.tar.gz", "url": "https://osf.io/download/684fefc97139f9f5536df7a8/"
-                }],
-                "reference_data": [],
-                "results": [{
-                    "filename": "results.tar.gz", "url": "https://osf.io/download/684fefc073a328e5cbb689c8/"
-                }]
-            }   
-    },
-    {
-        "task_id": "viral-metagenomics",
-        "name": "Viral Metagenomics: Species Identification (Dolphin)",
-        "description": "Identify viral species present in a dolphin fecal sample from paired-end reads; output CSV with contig_count, domain, and species.",
-        "download_urls": 
-            {
-                "data": [{
-                    "filename": "data.tar.gz", "url": "https://osf.io/download/6833945965db6dbb58d6a3c6/"
-                }],
-                "reference_data": [{
-                    "filename": "reference-data.tar.gz", "url": "https://osf.io/download/683423565d0944b2b685b1bd/"
-                },
-                {
-                    "filename": "kaiju_db_viruses_2024-08-15.tgz", "url": "https://osf.io/download/6833926d0c80ee431a85b55e/"
-                }],
-                "results": [{
-                    "filename": "results.tar.gz", "url": "https://osf.io/download/6833945c0c26956233a4db0e/"
-                }]
-            }   
+  {
+    "task_id": "alzheimer-mouse",
+    "name": "Alzheimer Mouse Models: Comparative Pathway Analysis",
+    "description": "Analyze 5xFAD, 3xTG-AD, and PS301S mouse models: normalize counts, perform differential expression, run KEGG pathway enrichment, and compare shared pathways across models.",
+    "task_prompt": "Perform a comparative analysis of three different Alzheimer's Disease mouse models (5xFAD, 3xTG-AD, and PS3O1S) to identify shared molecular pathways. The output should be a CSV file with the following columns: 'pathway','5xFAD_pvalue','3xTG_AD_pvalue','PS3O1S_pvalue'. Example csv <example>Pathway,5xFAD_pvalue,3xTG_AD_pvalue,PS3O1S_pvalue\nPhagosome Homo sapiens hsa04145,1.5045916403148935e-09,0.3102788532065793,0.4443015705596512\n</example> ",
+    "download_urls": {
+      "data": [
+        {
+          "filename": "data.tar.gz",
+          "url": "https://osf.io/download/2e94t/"
+        }
+      ],
+      "reference_data": [],
+      "results": [
+        {
+          "filename": "results.tar.gz",
+          "url": "https://osf.io/download/68336626b5864b789da4dc7f/"
+        }
+      ]
     }
+  },
+  {
+    "task_id": "comparative-genomics",
+    "name": "Comparative Genomics: Co-evolving Gene Clusters",
+    "description": "The datasets consists FASTA sequences and GFF annotations of a microbial genome for Micrococcus. The goal of is to do phylogenetic reconstruction of clusters of orthologous co-evolving genes; identify functionally conserved gene clusters across the genomes and group them into co-evolving functional modules. The COGs needs to be filtered based on the following quality criteria.",
+    "task_prompt": "Reconstruct phylogeny and identify COGs across four Micrococcus genomes; filter clusters present in all genomes, coding-only, with high-confidence annotations. The output should be a CSV file with the following columns: 'cluster_number, 'consensus_annotation'.<example>cluster_number,consensus_annotation\n1,K07222  K07222, putative flavoprotein involved in K+ transport\n2,K01069  gloB, gloC, HAGH, hydroxyacylglutathione hydrolase [EC:3.1.2.6]\n</example>",
+    "download_urls": {
+      "data": [
+        {
+          "filename": "data.tar.gz",
+          "url": "https://osf.io/download/nz3sq/"
+        }
+      ],
+      "reference_data": [
+        {
+          "filename": "actinobacteria.tar.gz",
+          "url": "https://osf.io/download/688634a1c0fb9e14f4f27c3d/"
+        }
+      ],
+      "results": [
+        {
+          "filename": "results.tar.gz",
+          "url": "https://osf.io/download/6886330d335b56867ee7cc56/"
+        }
+      ]
+    }
+  },
+  {
+    "task_id": "cystic-fibrosis",
+    "name": "Cystic Fibrosis Mendelian Variant Identification",
+    "description": "The sample dataset is a simulated dataset for finding the generic cause of Cystic fibrosis. The dataset is real sequencing data from CEPH_1463 dataset provided by the Complete Genomics Diversity Panel. It consists of sequencing of a family: 4 grandparents, 2 parents and 11 siblings. A known Mandelian disease mutation has been added on three siblings, taking care to be consistent with the underlying heplotype structure. The goal is to find the mutation causing the mendalian recessive trait - Cystic Fibrosis.",
+    "task_prompt": "Find the genetic cause of Cystic fibrosis; identify the causal recessive variant consistent with affected siblings NA12885, NA12886, and NA12879. The output should be a CSV file with the following columns: chromosome,position,variant_id,reference,alternate,gene_name,gene_id,annotation,impact,transcript_id,hgvs_c,hgvs_p,clinical_significance,diseases,review_status,rs_id. <example>chromosome,position,variant_id,reference,alternate,gene_name,gene_id,annotation,impact,transcript_id,hgvs_c,hgvs_p,clinical_significance,diseases,review_status,rs_id\nX,123456789,VAR123,A,G,GENE1,ENSG00000000001,missense_variant,MODERATE,ENST00000000001,c.123A>G,p.Lys41Arg,Likely_pathogenic,Disease_A; Disease_B; not_provided,reviewed_by_expert_panel,rs0000001</example>",
+    "download_urls": {
+      "data": [
+        {
+          "filename": "data.tar.gz",
+          "url": "https://osf.io/download/zafgd/"
+        }
+      ],
+      "reference_data": [
+        {
+          "filename": "clinvar_20250521.vcf.gz",
+          "url": "https://osf.io/download/68345adb08d1077918ab8378/"
+        }
+      ],
+      "results": [
+        {
+          "filename": "results.tar.gz",
+          "url": "https://osf.io/download/v8egn/"
+        }
+      ]
+    }
+  },
+  {
+    "task_id": "deseq",
+    "name": "RNA-Seq Differential Expression (DESeq2)",
+    "description": "The dataset consists of RNA-Seq samples from Candida parapsilosis wild-type (WT) strains grown in planktonic and biofilm conditions, generated as part of a study on gene expression and biofilm formation. The samples were sequenced on the Illumina HiSeq 2000 platform. The goal of this analysis is to perform differential expression analysis using DESeq2 to identify genes that are significantly up- or down-regulated between planktonic and biofilm conditions, providing insights into biofilm-associated transcriptional changes.",
+    "task_prompt": "Identify differentialy expressed genes between planktonic and biofilm conditions of Candida parapsilosis. The output should be a CSV file with the following columns.",
+    "download_urls": {
+      "data": [
+        {
+          "filename": "SRR1278968.tar.gz",
+          "url": "https://osf.io/download/68468fe0b8c35b8d7fd6a397/"
+        },
+        {
+          "filename": "SRR1278969.tar.gz",
+          "url": "https://osf.io/download/68468dc10781da6500a4da4f/"
+        },
+        {
+          "filename": "SRR1278970.tar.gz",
+          "url": "https://osf.io/download/68469352ccfa808c4bd6a429/"
+        },
+        {
+          "filename": "SRR1278971.tar.gz",
+          "url": "https://osf.io/download/684694513564c1f16c85b2b5/"
+        },
+        {
+          "filename": "SRR1278972.tar.gz",
+          "url": "https://osf.io/download/6846941a3564c1f16c85b2a7/"
+        }
+      ],
+      "reference_data": [
+        {
+          "filename": "reference.tar.gz",
+          "url": "https://osf.io/download/6846a110c03eeac9d2a4da2e/"
+        }
+      ],
+      "results": [
+        {
+          "filename": "results.tar.gz",
+          "url": "https://osf.io/download/6846a111dfcfcd74e2ab813b/"
+        }
+      ]
+    }
+  },
+  {
+    "task_id": "evolution",
+    "name": "Experimental Evolution Variant Calling (E. coli)",
+    "description": "The experiment follows a similar strategy as in what is called an experimental evolution experiment. The final aim is to identify the genome variations in evolved lines of E. coli. The data is composed of a single ancestor line and two evolved lines. The data is from a paired-end sequencing run data from an Illumina HiSeq. This data has been post-processed in two ways already. All sequences that were identified as belonging to the PhiX genome have been removed. Illumina adapters have been removed as well already.",
+    "task_prompt": "Identify and annotate genome variants in two evolved lines relative to an ancestor lines of E. coli; report only variants shared by both evolved lines of moderate or higher predicted severity. The output should be a CSV file with the following columns: 'chrom','pos','ref','alt','gene','impact','effect',status'.<example>CHROM,POS,REF,ALT,GENE,IMPACT,EFFECT,STATUS\nNODE_4_length_102007_cov_6.351643,6352,T,C,ICCIAKIK_00327,MODERATE,missense_variant,shared</example>",
+    "download_urls": {
+      "data": [
+        {
+          "filename": "data.tar.gz",
+          "url": "https://osf.io/download/688a14249d739c43eda23e55/"
+        }
+      ],
+      "reference_data": [],
+      "results": [
+        {
+          "filename": "results.tar.gz",
+          "url": "https://osf.io/download/688a0db3222020edd0e7cc66/"
+        }
+      ]
+    }
+  },
+  {
+    "task_id": "giab",
+    "name": "GIAB Variant Calling (NA12878 chr20 subset)",
+    "description": "Call variants on the chr20 subset of NA12878 aligned to GRCh38 and benchmark against GIAB high-confidence truth set.",
+    "task_prompt": "",
+    "download_urls": {
+      "data": [
+        {
+          "filename": "data.tar.gz",
+          "url": "https://osf.io/download/689d9ecdf1ebb97673bc0ca7/"
+        }
+      ],
+      "reference_data": [
+        {
+          "filename": "reference.tar.gz",
+          "url": "https://osf.io/download/689ca8f0f375f799101f201d/"
+        }
+      ],
+      "results": [
+        {
+          "filename": "results.tar.gz",
+          "url": "https://osf.io/download/689caa007283d4d1371f1f5a/"
+        }
+      ]
+    }
+  },
+  {
+    "task_id": "metagenomics",
+    "name": "Metagenomics: Community Comparison (Cuatro Ciénegas)",
+    "description": "Compare microbial communities between control microcosm JC1A and fertilized pond JP4D to assess effects of nutrient enrichment.",
+    "task_prompt": "",
+    "download_urls": {
+      "data": [
+        {
+          "filename": "data.tar.gz",
+          "url": "https://osf.io/download/688c83477fecfec1cea2406c/"
+        }
+      ],
+      "reference_data": [],
+      "results": [
+        {
+          "filename": "results.tar.gz",
+          "url": "https://osf.io/download/688c803bf191a05eb312ff76/"
+        }
+      ]
+    }
+  },
+  {
+    "task_id": "single-cell",
+    "name": "Single-cell RNA-seq: Skeletal Muscle Exercise Response",
+    "description": "10x Genomics data pre- and post-exercise; QC, normalization, dimensionality reduction, clustering, cell type identification, and differential expression per cell type with aggregated output.",
+    "task_prompt": "",
+    "download_urls": {
+      "data": [
+        {
+          "filename": "data.tar.gz",
+          "url": "https://osf.io/download/688e6ed133700f5303c358dd/"
+        }
+      ],
+      "reference_data": [
+        {
+          "filename": "reference.tar.gz",
+          "url": "https://osf.io/download/688e6d05f99f6f9bdec3570d/"
+        }
+      ],
+      "results": [
+        {
+          "filename": "results.tar.gz",
+          "url": "https://osf.io/download/688e6d080f937c7ae34cac28/"
+        }
+      ]
+    }
+  },
+  {
+    "task_id": "transcript-quant",
+    "name": "Transcript Quantification (Simulated RNA-Seq)",
+    "description": "Quantify transcripts from paired-end reads against the provided transcriptome; simulated dataset of 582 transcripts from 66 genes with goal of exact read count matches.",
+    "task_prompt": "",
+    "download_urls": {
+      "data": [
+        {
+          "filename": "data.tar.gz",
+          "url": "https://osf.io/download/684fefc97139f9f5536df7a8/"
+        }
+      ],
+      "reference_data": [],
+      "results": [
+        {
+          "filename": "results.tar.gz",
+          "url": "https://osf.io/download/684fefc073a328e5cbb689c8/"
+        }
+      ]
+    }
+  },
+  {
+    "task_id": "viral-metagenomics",
+    "name": "Viral Metagenomics: Species Identification (Dolphin)",
+    "description": "Identify viral species present in a dolphin fecal sample from paired-end reads; output CSV with contig_count, domain, and species.",
+    "task_prompt": "",
+    "download_urls": {
+      "data": [
+        {
+          "filename": "data.tar.gz",
+          "url": "https://osf.io/download/6833945965db6dbb58d6a3c6/"
+        }
+      ],
+      "reference_data": [
+        {
+          "filename": "reference-data.tar.gz",
+          "url": "https://osf.io/download/683423565d0944b2b685b1bd/"
+        },
+        {
+          "filename": "kaiju_db_viruses_2024-08-15.tgz",
+          "url": "https://osf.io/download/6833926d0c80ee431a85b55e/"
+        }
+      ],
+      "results": [
+        {
+          "filename": "results.tar.gz",
+          "url": "https://osf.io/download/6833945c0c26956233a4db0e/"
+        }
+      ]
+    }
+  }
 ]
-
