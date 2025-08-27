@@ -135,7 +135,10 @@ The goal is to perform transcript quantification from paired-end RNA-Seq reads u
 https://jose.theoj.org/papers/10.21105/jose.00209
 https://carpentries-lab.github.io/metagenomics-analysis/
 #### Data background
-The metagenomes that we will use were collected in Cuatro Ciénegas, in a study about the response of the Cuatro Cienegas' bacterial community to nutrient enrichment. In this study, authors compared the differences between the microbial community in its natural, oligotrophic, phosphorus-deficient environment, a pond from the Cuatro Ciénegas Basin (CCB), and the same microbial community under a fertilization treatment. Sample data is Control mecocosm (JC1A) and fertilized pond (JP4D)
+The dataset consists of metagenomic sequencing data collected from the Cuatro Ciénegas Basin (CCB), a unique oligotrophic, phosphorus-deficient environment in northern Mexico. The study compared microbial community composition under natural conditions (control mesocosm, JC1A) and after nutrient enrichment (fertilized pond, JP4D). Sequencing reads from both environments were processed to generate operational taxonomic unit (OTU) profiles with taxonomic assignments (Kingdom, Phylum), enabling quantitative comparison of bacterial community shifts in response to fertilization.
+
+#### Goal
+The goal is to analyze metagenomic sequencing data to identify differences in microbial community composition between control and fertilized conditions. The analysis should include quality control, taxonomic classification, and relative abundance estimation, with results summarized as an OTU abundance table (CSV) reporting the relative frequency of bacterial taxa across conditions.
 
 ### Comparative Genomics
 https://www.ahl27.com/CompGenomicsBioc2022/articles/CompGenomicsBioc2022.html

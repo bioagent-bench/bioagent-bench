@@ -138,8 +138,8 @@
   {
     "task_id": "giab",
     "name": "GIAB Variant Calling (NA12878 chr20 subset)",
-    "description": "Call variants on the chr20 subset of NA12878 aligned to GRCh38 and benchmark against GIAB high-confidence truth set.",
-    "task_prompt": "",
+    "description": "The GIAB dataset consists of Agilent SureSelect v7 exome sequencing (~75M reads) from the NA12878 reference sample, providing high-confidence benchmark variants on GRCh38. The task is to perform germline variant callin on NA12878.",
+    "task_prompt": "Use the sequencing data from NA12878 (Agilent SureSelect v7, ~75M reads) to perform germline variant calling. The output should be a .vcf.gz variant call file and a .vcf.gz.tbi tabix index for the VCF file.",
     "download_urls": {
       "data": [
         {
@@ -164,8 +164,8 @@
   {
     "task_id": "metagenomics",
     "name": "Metagenomics: Community Comparison (Cuatro Ciénegas)",
-    "description": "Compare microbial communities between control microcosm JC1A and fertilized pond JP4D to assess effects of nutrient enrichment.",
-    "task_prompt": "",
+    "description": "The metagenomics dataset consists of sequencing reads from the Cuatro Ciénegas Basin, comparing microbial communities under control (JC1A) and nutrient-enriched (JP4D) conditions. The task is to profile taxonomic composition and report relative abundances of bacterial taxa.",
+    "task_prompt": "Perform metagenomic analysis of control (JC1A) and fertilized (JP4D) samples to classify microbial taxa and estimate relative abundances. The output should be a CSV file with the following columns: 'OTU','Kingdom','Phylum','JP4D','JC1A'.<example>OTU,Kingdom,Phylum,JP4D,JC1A\n2771361,Bacteria,Pseudomonadota,84.8612882653061,66.4367816091954</example>",
     "download_urls": {
       "data": [
         {
@@ -185,8 +185,8 @@
   {
     "task_id": "single-cell",
     "name": "Single-cell RNA-seq: Skeletal Muscle Exercise Response",
-    "description": "10x Genomics data pre- and post-exercise; QC, normalization, dimensionality reduction, clustering, cell type identification, and differential expression per cell type with aggregated output.",
-    "task_prompt": "",
+    "description": "The single-cell RNA-seq dataset consists of human skeletal muscle samples collected before and after acute exercise, sequenced with 10X Genomics. The task is to identify cell types and determine their transcriptional responses to exercise.",
+    "task_prompt": "Analyze single-cell RNA-seq data from pre- and post-exercise skeletal muscle samples. Perform clustering, cell type identification, and differential expression analysis within each cell type between conditions. The output should be a CSV file with the following columns: 'cluster_id','predicted_cell_type','gene_name','logfoldchanges','pvals','pvals_adj','direction','abs_logfc'.<example>cluster_id,predicted_cell_type,gene_name,logfoldchanges,pvals,pvals_adj,direction,abs_logfc\n0,Perivascular cell,RNASE1,-6.658449,3.443035537523368e-15,6.886071075046736e-12,down,6.658449</example>",
     "download_urls": {
       "data": [
         {
@@ -211,8 +211,8 @@
   {
     "task_id": "transcript-quant",
     "name": "Transcript Quantification (Simulated RNA-Seq)",
-    "description": "Quantify transcripts from paired-end reads against the provided transcriptome; simulated dataset of 582 transcripts from 66 genes with goal of exact read count matches.",
-    "task_prompt": "",
+    "description": "The goal is to quantify transcript expression levels from paired-end RNA-Seq reads (reads_1.fq.gz, reads_2.fq.gz) using the provided reference transcriptome (transcriptome.fa). Because the data is simulated, the quantification should exactly reproduce the underlying counts. The results represent a mapping from transcript IDs → read counts.",
+    "task_prompt": "Perform transcript quantification on the provided paired-end RNA-Seq reads using the transcriptome reference. The output should be a .tsv file with the following columns:'transcript_id'\t'count'.<example>transcript_id\tcount\nENST000000001\t523</example>",
     "download_urls": {
       "data": [
         {
@@ -232,8 +232,8 @@
   {
     "task_id": "viral-metagenomics",
     "name": "Viral Metagenomics: Species Identification (Dolphin)",
-    "description": "Identify viral species present in a dolphin fecal sample from paired-end reads; output CSV with contig_count, domain, and species.",
-    "task_prompt": "",
+    "description": "The viral metagenomics dataset consists of paired-end sequencing reads from a dolphin with gastroenteritis of suspected viral origin. The task is to identify viral species present in the fecal sample by assembling and classifying contigs.",
+    "task_prompt": "Analyze paired-end metagenomic sequencing data from a dolphin fecal sample to identify potential viral agents. Assemble and classify contigs, then summarize results by taxonomic domain and species. The output should be a CSV file with the following columns: 'contig_count','domain','species'.<example>contig_count,domain,species\n2,Viruses,H1N1 5\n68,Unclassified,</example>",
     "download_urls": {
       "data": [
         {
