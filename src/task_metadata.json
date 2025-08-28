@@ -98,6 +98,10 @@
         {
           "filename": "SRR1278972.tar.gz",
           "url": "https://osf.io/download/6846941a3564c1f16c85b2a7/"
+        },
+        {
+          "filename": "SRR1278973.tar.gz",
+          "url": "https://osf.io/download/68b0afa67f881b4d577da9f7/"
         }
       ],
       "reference_data": [
@@ -109,7 +113,7 @@
       "results": [
         {
           "filename": "results.tar.gz",
-          "url": "https://osf.io/download/6846a111dfcfcd74e2ab813b/"
+          "url": "https://osf.io/download/68b0b0fba826cb07ed161e64/"
         }
       ]
     }

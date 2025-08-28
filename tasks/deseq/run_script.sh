@@ -19,10 +19,10 @@ prefetch SRR1278968 SRR1278969 SRR1278970 SRR1278971 SRR1278972 SRR1278973 \
     -O "${SCRIPT_DIR}/data/"
 
 # Convert SRA to FASTQ
-echo "Converting SRA to FASTQ..."
-for sra_file in "${SCRIPT_DIR}"/data/SRR*/*.sra; do
-    fasterq-dump "$sra_file" -O "${SCRIPT_DIR}/data/processing/0_fasterqdump"
-done 
+# echo "Converting SRA to FASTQ..."
+# for sra_file in "${SCRIPT_DIR}"/data/*.sra; do
+#     fasterq-dump "$sra_file" -O "${SCRIPT_DIR}/data/processing/0_fasterqdump"
+# done 
 
 # Run FastQC on raw data
 echo "Running FastQC on raw data..."
@@ -107,11 +107,6 @@ if [ ! -f "${SCRIPT_DIR}/data/processing/9_gorich/gene_association.cgd" ]; then
         http://www.candidagenome.org/download/go/gene_association.cgd.gz
     gunzip "${SCRIPT_DIR}/data/processing/9_gorich/gene_association.cgd.gz"
 fi
-
-# Switch to R environment and run analysis
-echo "Running DESeq2 analysis..."
-mamba deactivate
-mamba activate rnaseq-r
 
 # Run R analysis
 mkdir -p results

@@ -15,7 +15,6 @@ tasks/*/*
 !tasks/*/docker_run_script.sh
 
 # Task-specific allowed files
-!tasks/deseq/run_deseq.R
 !tasks/metagenomics/run_phyloseq.R
 !tasks/comparative-geno/run_comparative.R
 !tasks/alzheimer-mouse/run_analysis.py
@@ -23,3 +22,4 @@ tasks/*/*
 !tasks/giab/sarek_script.sh
 !tasks/giab/eval_script.sh
 !tasks/giab/preprocess_script.sh
+!tasks/deseq/run_deseq.py
