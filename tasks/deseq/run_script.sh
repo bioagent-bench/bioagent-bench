@@ -19,10 +19,10 @@ prefetch SRR1278968 SRR1278969 SRR1278970 SRR1278971 SRR1278972 SRR1278973 \
     -O "${SCRIPT_DIR}/data/"
 
 # Convert SRA to FASTQ
-# echo "Converting SRA to FASTQ..."
-# for sra_file in "${SCRIPT_DIR}"/data/*.sra; do
-#     fasterq-dump "$sra_file" -O "${SCRIPT_DIR}/data/processing/0_fasterqdump"
-# done 
+echo "Converting SRA to FASTQ..."
+for sra_file in "${SCRIPT_DIR}"/data/SRR*/*.sra; do
+    fasterq-dump "$sra_file" -O "${SCRIPT_DIR}/data/processing/0_fasterqdump"
+done 
 
 # Run FastQC on raw data
 echo "Running FastQC on raw data..."
