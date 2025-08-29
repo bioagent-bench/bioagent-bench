@@ -63,7 +63,8 @@ class BioAgentDataset:
                         f.write(chunk)
             
             # Auto-extract tar archives if detected (handles .tar.gz, .tgz, .tar)
-            if tarfile.is_tarfile(output_path):
+            # Skip extraction for specific database files that should remain compressed
+            if tarfile.is_tarfile(output_path) and not output_path.name.startswith("kaiju_db_viruses"):
                 self._extract_tarfile(output_path)
                 
             return True

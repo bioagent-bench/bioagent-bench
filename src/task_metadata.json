@@ -177,7 +177,12 @@
           "url": "https://osf.io/download/688c83477fecfec1cea2406c/"
         }
       ],
-      "reference_data": [],
+      "reference_data": [
+        {
+          "filename": "k2_standard_16gb_20241228.tar.gz",
+          "url": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_16gb_20241228.tar.gz"
+        }
+      ],
       "results": [
         {
           "filename": "results.tar.gz",
