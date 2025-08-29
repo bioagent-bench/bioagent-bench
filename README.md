@@ -43,6 +43,11 @@ uv run python src/dataset.py list-tasks
 uv run python src/dataset.py download --task giab
 ```
 
+- **Specify a destination path**
+```bash
+uv run python src/dataset.py download --dest path/to/bioagent-data --task giab
+```
+
 - **Download multiple tasks**
 ```bash
 uv run python src/dataset.py download --task giab --task deseq --task metagenomics
