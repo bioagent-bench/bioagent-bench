@@ -143,7 +143,7 @@
     "task_id": "giab",
     "name": "GIAB Variant Calling (NA12878 chr20 subset)",
     "description": "The GIAB dataset consists of Agilent SureSelect v7 exome sequencing (~75M reads) from the NA12878 reference sample, providing high-confidence benchmark variants on GRCh38. The task is to perform germline variant callin on NA12878.",
-    "task_prompt": "Use the sequencing data from NA12878 (Agilent SureSelect v7, ~75M reads) to perform germline variant calling. The output should be a .vcf.gz variant call file and a .vcf.gz.tbi tabix index for the VCF file.",
+    "task_prompt": "Use the sequencing data from NA12878 (Agilent SureSelect v7, ~75M reads) to perform germline variant calling. The output should be a .vcf.gz variant call file.",
     "download_urls": {
       "data": [
         {
