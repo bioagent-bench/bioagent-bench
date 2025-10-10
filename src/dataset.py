@@ -63,9 +63,20 @@ class BioAgentDataset:
                         f.write(chunk)
             
             # Auto-extract tar archives if detected (handles .tar.gz, .tgz, .tar)
-            # Skip extraction for specific database files that should remain compressed
-            if tarfile.is_tarfile(output_path) and not output_path.name.startswith("kaiju_db_viruses"):
-                self._extract_tarfile(output_path)
+            if tarfile.is_tarfile(output_path):
+                special_prefixes = (
+                    "kaiju_db_viruses_2024-08-15",
+                    "k2_standard_16gb_20241228",
+                )
+                subdir_name = next(
+                    (
+                        prefix
+                        for prefix in special_prefixes
+                        if output_path.name.startswith(prefix)
+                    ),
+                    None,
+                )
+                self._extract_tarfile(output_path, subdir_name=subdir_name)
                 
             return True
             
@@ -75,23 +86,27 @@ class BioAgentDataset:
                 output_path.unlink()
             return False
     
-    def _extract_tarfile(self, tar_path: Path) -> None:
-        """Extract tar archive contents directly to the archive's directory and delete the archive."""
+    def _extract_tarfile(self, tar_path: Path, subdir_name: Optional[str] = None) -> None:
+        """Extract tar archive contents directly and delete the archive."""
         output_dir = tar_path.parent
-        
+        if subdir_name:
+            output_dir = output_dir / subdir_name
+
+        output_dir.mkdir(parents=True, exist_ok=True)
+
         print(f"Extracting {tar_path} to {output_dir}")
-        
+
         try:
             with tarfile.open(tar_path, 'r:*') as tar:
                 for member in tar.getmembers():
                     if member.isfile():
                         member.name = Path(member.name).name
                         tar.extract(member, path=output_dir)
-            
+
             tar_path.unlink()
             print(f"Removed archive: {tar_path}")
             print(f"Successfully extracted {tar_path} to {output_dir}")
-            
+
         except Exception as e:
             print(f"Error extracting {tar_path}: {e}")
     

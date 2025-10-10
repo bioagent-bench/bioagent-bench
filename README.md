@@ -33,50 +33,18 @@ uv sync
 uv run python src/dataset.py --help
 ```
 
-- **List available tasks**
-```bash
-uv run python src/dataset.py list-tasks
-```
-
-- **Download a single task's data**
-```bash
-uv run python src/dataset.py download --task giab
-```
-
-- **Specify a destination path**
-```bash
-uv run python src/dataset.py download --dest path/to/bioagent-data --task giab
-```
-
-- **Download multiple tasks**
-```bash
-uv run python src/dataset.py download --task giab --task deseq --task metagenomics
-```
-
-- **Download all tasks**
+- **Download all tasks to a destination**
 ```bash
 uv run python src/dataset.py download --all --dest /path/to/output/
 ```
 
-- **Include reference files**
-```bash
-uv run python src/dataset.py download --task giab --reference
-```
-
-- **Download results only**
-```bash
-# For specific tasks
-uv run python src/dataset.py download --task giab --results --no-data --no-reference
-
-# For all tasks
-uv run python src/dataset.py download-all-results
-```
+Other CLI options (see `--help` for details): list available tasks, download a single task, include reference files, limit output to results only, and combine multiple tasks in one call.
 
 
 Files are downloaded under `tasks/<task_id>/`:
 - `data/` for input datasets
-- `reference/` for reference data when `--reference` is used
-- `results/` for evaluation result files when `--results` or `download-all-results` is used
+- `reference/` for reference data
+- `results/` for evaluation result files
 
 ## Some general ideas about the benchmark
 In ideal case you should only care about the src/ folder where you can download the input files, analyze, eval them against "truth" files. Different software, versions, assumptions will produce different results. Where there is consensus actual ground truth like in GIAB (Genome in a bottle) or simulated data we can  produce eval metrics. In other cases we evaluate against correctness of output and try to see if there are at least some overlapping outputs. 
