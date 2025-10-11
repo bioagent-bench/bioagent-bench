@@ -3,7 +3,7 @@
     "task_id": "alzheimer-mouse",
     "name": "Alzheimer Mouse Models: Comparative Pathway Analysis",
     "description": "Analyze 5xFAD, 3xTG-AD, and PS301S mouse models: normalize counts, perform differential expression, run KEGG pathway enrichment, and compare shared pathways across models.",
-    "task_prompt": "Perform a comparative analysis of three different Alzheimer's Disease mouse models (5xFAD, 3xTG-AD, and PS3O1S) to identify shared molecular pathways. The output should be a CSV file with the following columns: 'pathway','5xFAD_pvalue','3xTG_AD_pvalue','PS3O1S_pvalue'. Example csv <example>Pathway,5xFAD_pvalue,3xTG_AD_pvalue,PS3O1S_pvalue\nPhagosome Homo sapiens hsa04145,1.5045916403148935e-09,0.3102788532065793,0.4443015705596512\n</example> ",
+    "task_prompt": "Perform a comparative differential expression analysis of three different Alzheimer's Disease mouse models (5xFAD, 3xTG-AD, and PS3O1S) to identify shared molecular KEGG pathways. The output should be a CSV file with the following columns: 'pathway','5xFAD_pvalue','3xTG_AD_pvalue','PS3O1S_pvalue'. Example csv <example>Pathway,5xFAD_pvalue,3xTG_AD_pvalue,PS3O1S_pvalue\nPhagosome Homo sapiens hsa04145,1.5045916403148935e-09,0.3102788532065793,0.4443015705596512\n</example> ",
     "download_urls": {
       "data": [
         {
