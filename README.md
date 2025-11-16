@@ -33,10 +33,16 @@ uv sync
 uv run python src/dataset.py --help
 ```
 
-- **Download all tasks to a destination**
+- **Download all input data to a destination**
 ```bash
 uv run python src/dataset.py download --all --dest /path/to/output/
 ```
+
+- **Download all input data, reference data, results data to a destination**
+```bash
+uv run python src/dataset.py download --all --dest /path/to/output/ --reference --results
+```
+
 
 Other CLI options (see `--help` for details): list available tasks, download a single task, include reference files, limit output to results only, and combine multiple tasks in one call.
 
