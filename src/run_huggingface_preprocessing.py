@@ -77,18 +77,14 @@ def is_vcf_file(path: Path) -> bool:
         return True
     return False
 
-def compute_sha256(path: Path, max_bytes: Optional[int] = None) -> str:
+def compute_sha256(path: Path) -> str:
     h = hashlib.sha256()
-    bytes_read = 0
     with open(path, "rb") as f:
         while True:
             chunk = f.read(1024 * 1024)
             if not chunk:
                 break
             h.update(chunk)
-            bytes_read += len(chunk)
-            if max_bytes is not None and bytes_read >= max_bytes:
-                break
     return h.hexdigest()
 
 
@@ -130,7 +126,7 @@ def sanitize_for_dir(name: str) -> str:
     return "".join(ch if (ch.isalnum() or ch in ("_", "-", ".")) else "_" for ch in name)
 
 
-def fastq_reader(path: str, max_reads: Optional[int]) -> Iterator[dict]:
+def fastq_reader(path: str, max_reads: Optional[int], source_sha256: str) -> Iterator[dict]:
     is_gz = path.endswith(".gz")
     opener = gzip.open if is_gz else open
     emitted = 0
@@ -151,13 +147,14 @@ def fastq_reader(path: str, max_reads: Optional[int]) -> Iterator[dict]:
                 "sequence": seq.strip(),
                 "quality": qual.strip(),
                 "source_file": os.path.basename(path),
+                "source_sha256": source_sha256,
             }
             emitted += 1
             if max_reads is not None and max_reads > 0 and emitted >= max_reads:
                 break
 
 
-def fasta_reader(path: str, max_seqs: Optional[int]) -> Iterator[dict]:
+def fasta_reader(path: str, max_seqs: Optional[int], source_sha256: str) -> Iterator[dict]:
     is_gz = path.endswith(".gz")
     opener = gzip.open if is_gz else open
     emitted = 0
@@ -173,6 +170,7 @@ def fasta_reader(path: str, max_seqs: Optional[int]) -> Iterator[dict]:
             "description": desc,
             "sequence": sequence,
             "source_file": os.path.basename(path),
+            "source_sha256": source_sha256,
         }
     with opener(path, "rt", encoding="utf-8", errors="ignore") as fh:
         for line in fh:
@@ -200,7 +198,7 @@ def fasta_reader(path: str, max_seqs: Optional[int]) -> Iterator[dict]:
             yield record
 
 
-def vcf_reader(path: str) -> Iterator[dict]:
+def vcf_reader(path: str, source_sha256: str) -> Iterator[dict]:
     is_gz = path.endswith(".gz")
     opener = gzip.open if is_gz else open
     with opener(path, "rt", encoding="utf-8", errors="ignore") as fh:
@@ -245,13 +243,13 @@ def vcf_reader(path: str) -> Iterator[dict]:
                 "format": fmt,
                 "samples": samples,
                 "source_file": os.path.basename(path),
+                "source_sha256": source_sha256,
             }
 
 
 def read_tabular(path: Path, max_rows: Optional[int]) -> pd.DataFrame:
     ext = path.suffix.lower()
     sep: Optional[str] = None
-    # Try to detect separator from the header
     try:
         with open(path, "r", encoding="utf-8", errors="ignore") as fh:
             head = "".join([fh.readline() for _ in range(3)])
@@ -278,7 +276,6 @@ def save_dataset(ds: Dataset, out_dir: Path, overwrite: bool) -> None:
     if out_dir.exists():
         if not overwrite:
             return
-        # Clean directory if overwriting
         for p in out_dir.iterdir():
             if p.is_file():
                 p.unlink()
@@ -310,20 +307,6 @@ def save_dataset(ds: Dataset, out_dir: Path, overwrite: bool) -> None:
     help="Directory to write Hugging Face datasets.",
 )
 
-@click.option(
-    "--compute-checksums/--no-compute-checksums",
-    default=False,
-    show_default=True,
-    help="Compute SHA256 checksums for files (may be slow).",
-)
-
-@click.option(
-    "--checksum-bytes",
-    type=int,
-    default=50 * 1024 * 1024,
-    show_default=True,
-    help="Max bytes to read per file for checksum (None for full).",
-)
 @click.option(
     "--max-rows",
     type=int,
@@ -360,8 +343,6 @@ def save_dataset(ds: Dataset, out_dir: Path, overwrite: bool) -> None:
 def main(
     root_dir: Path,
     out_dir: Path,
-    compute_checksums: bool,
-    checksum_bytes: int,
     max_rows: int,
     overwrite: bool,
     flat_output: bool,
@@ -373,11 +354,9 @@ def main(
     if not root_dir.exists():
         raise SystemExit(f"Root directory not found: {root_dir}")
 
-    # Create top-level output directory
     out_dir.mkdir(parents=True, exist_ok=True)
 
     for task_id, task_path in iter_task_dirs(root_dir):
-        # Skip the output directory if it sits under the root
         try:
             if task_path.resolve() == out_dir:
                 continue
@@ -385,9 +364,7 @@ def main(
             pass
         click.echo(f"[{task_id}] Processing directory: {task_path}")
 
-        # 1) Proceed to conversions (file index disabled)
 
-        # 2) Convert tabular, FASTQ, FASTA/FNA, and VCF files inside this task
         tables_out_base = out_dir / task_id / "tables"
         fastq_out_base = out_dir / task_id / "fastq"
         fasta_out_base = out_dir / task_id / "fasta"
@@ -402,9 +379,11 @@ def main(
             # Tabular conversion
             if is_tabular_file(file_path):
                 try:
+                    sha = compute_sha256(file_path)
                     df = read_tabular(file_path, max_rows=max_rows if max_rows > 0 else None)
                     if df.empty:
                         continue
+                    df.insert(0, "source_sha256", sha)
                     ds = Dataset.from_pandas(df, preserve_index=False)
                     rel_to_task = file_path.relative_to(task_path)
                     if flat_output:
@@ -424,10 +403,15 @@ def main(
                 except Exception as e:
                     click.echo(f"[{task_id}] Skipping table {file_path.name}: {e}", err=True)
                 continue
-            # FASTQ conversion
+
             if is_fastq_file(file_path):
                 try:
-                    gen_kwargs = {"path": str(file_path), "max_reads": None if max_fastq_reads <= 0 else max_fastq_reads}
+                    sha = compute_sha256(file_path)
+                    gen_kwargs = {
+                        "path": str(file_path),
+                        "max_reads": None if max_fastq_reads <= 0 else max_fastq_reads,
+                        "source_sha256": sha,
+                    }
                     ds = Dataset.from_generator(fastq_reader, gen_kwargs=gen_kwargs)
                     rel_to_task = file_path.relative_to(task_path)
                     if flat_output:
@@ -448,10 +432,15 @@ def main(
                 except Exception as e:
                     click.echo(f"[{task_id}] Skipping FASTQ {file_path.name}: {e}", err=True)
                     continue
-            # FASTA conversion
+            
             if is_fasta_file(file_path):
                 try:
-                    gen_kwargs = {"path": str(file_path), "max_seqs": None if max_fasta_seqs <= 0 else max_fasta_seqs}
+                    sha = compute_sha256(file_path)
+                    gen_kwargs = {
+                        "path": str(file_path),
+                        "max_seqs": None if max_fasta_seqs <= 0 else max_fasta_seqs,
+                        "source_sha256": sha,
+                    }
                     ds = Dataset.from_generator(fasta_reader, gen_kwargs=gen_kwargs)
                     rel_to_task = file_path.relative_to(task_path)
                     if flat_output:
@@ -472,10 +461,14 @@ def main(
                 except Exception as e:
                     click.echo(f"[{task_id}] Skipping FASTA {file_path.name}: {e}", err=True)
                     continue
-            # VCF conversion
+
             if is_vcf_file(file_path):
                 try:
-                    ds = Dataset.from_generator(vcf_reader, gen_kwargs={"path": str(file_path)})
+                    sha = compute_sha256(file_path)
+                    ds = Dataset.from_generator(
+                        vcf_reader,
+                        gen_kwargs={"path": str(file_path), "source_sha256": sha},
+                    )
                     rel_to_task = file_path.relative_to(task_path)
                     if flat_output:
                         rel_str = str(rel_to_task)
