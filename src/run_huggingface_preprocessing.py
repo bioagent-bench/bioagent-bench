@@ -88,6 +88,29 @@ def compute_sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def infer_source_format(path: Path) -> str:
+    """Infer original file format for metadata."""
+    name = path.name.lower()
+    if is_fastq_file(path):
+        return "fastq"
+    if is_fasta_file(path):
+        # Distinguish fna vs fasta vs fa for transparency
+        if name.endswith(".fna") or name.endswith(".fna.gz"):
+            return "fna"
+        if name.endswith(".fa") or name.endswith(".fa.gz"):
+            return "fa"
+        return "fasta"
+    if is_vcf_file(path):
+        if name.endswith(".eff.vcf") or name.endswith(".eff.vcf.gz"):
+            return "eff.vcf"
+        return "vcf"
+    if name.endswith(".tsv"):
+        return "tsv"
+    if name.endswith(".csv"):
+        return "csv"
+    return (path.suffix or "").lstrip(".")
+
+
 def build_file_index(
     task_id: str, task_dir: Path, compute_checksums: bool, checksum_bytes: Optional[int]
 ) -> Dataset:
@@ -131,6 +154,7 @@ def fastq_reader(path: str, max_reads: Optional[int], source_sha256: str) -> Ite
     opener = gzip.open if is_gz else open
     emitted = 0
     with opener(path, "rt", encoding="utf-8", errors="ignore") as fh:
+        src_format = "fastq"
         while True:
             header = fh.readline()
             if not header:
@@ -148,6 +172,7 @@ def fastq_reader(path: str, max_reads: Optional[int], source_sha256: str) -> Ite
                 "quality": qual.strip(),
                 "source_file": os.path.basename(path),
                 "source_sha256": source_sha256,
+                "source_format": src_format,
             }
             emitted += 1
             if max_reads is not None and max_reads > 0 and emitted >= max_reads:
@@ -171,6 +196,7 @@ def fasta_reader(path: str, max_seqs: Optional[int], source_sha256: str) -> Iter
             "sequence": sequence,
             "source_file": os.path.basename(path),
             "source_sha256": source_sha256,
+            "source_format": infer_source_format(Path(path)),
         }
     with opener(path, "rt", encoding="utf-8", errors="ignore") as fh:
         for line in fh:
@@ -203,6 +229,7 @@ def vcf_reader(path: str, source_sha256: str) -> Iterator[dict]:
     opener = gzip.open if is_gz else open
     with opener(path, "rt", encoding="utf-8", errors="ignore") as fh:
         header_cols: Optional[List[str]] = None
+        src_format = "eff.vcf" if (path.endswith(".eff.vcf") or path.endswith(".eff.vcf.gz")) else "vcf"
         for raw in fh:
             if not raw:
                 continue
@@ -244,6 +271,7 @@ def vcf_reader(path: str, source_sha256: str) -> Iterator[dict]:
                 "samples": samples,
                 "source_file": os.path.basename(path),
                 "source_sha256": source_sha256,
+                "source_format": src_format,
             }
 
 
@@ -380,9 +408,13 @@ def main(
             if is_tabular_file(file_path):
                 try:
                     sha = compute_sha256(file_path)
+                    src_format = infer_source_format(file_path)
                     df = read_tabular(file_path, max_rows=max_rows if max_rows > 0 else None)
                     if df.empty:
                         continue
+                    # Add provenance columns
+                    df.insert(0, "source_format", src_format)
+                    df.insert(0, "source_file", file_path.name)
                     df.insert(0, "source_sha256", sha)
                     ds = Dataset.from_pandas(df, preserve_index=False)
                     rel_to_task = file_path.relative_to(task_path)
