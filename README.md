@@ -58,9 +58,8 @@ In ideal case you should only care about the src/ folder where you can download 
 
 ## What is allowed?
 Obviously don't prompt the LLM with the scripts used for reproducing the eval files. We have written two prompts for the humans reading this given below:
-1. Data background: Start prompting with this to give some background. This is what it was written
-for without reveleaing too much. This is not set in stone, edit it as you wish.
-2. Instruct: This is the goal of the analysis. Edit it as you wish.
+1. Data background: Summary of the data.
+2. Instruct: This is the goal of the analysis.
 
 ## Reproducing the pipelines
 If you really need to reproduce and check the results to do it you would run
