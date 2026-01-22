@@ -23,7 +23,7 @@
   {
     "task_id": "comparative-genomics",
     "name": "Comparative Genomics: Co-evolving Gene Clusters",
-    "description": "The datasets consists FASTA sequences and GFF annotations of a microbial genome for Micrococcus. The goal of is to do phylogenetic reconstruction of clusters of orthologous co-evolving genes; identify functionally conserved gene clusters across the genomes and group them into co-evolving functional modules. The COGs needs to be filtered based on the following quality criteria.",
+    "description": "The datasets consists FASTA sequences and GFF annotations of a microbial genome for Micrococcus. The goal of is to do phylogenetic reconstruction of clusters of orthologous co-evolving genes; identify functionally conserved gene clusters across the genomes and group them into co-evolving functional modules.",
     "task_prompt": "Reconstruct phylogeny and identify COGs across four Micrococcus genomes; filter clusters present in all genomes, coding-only, with high-confidence annotations. The output should be a CSV file with the following columns: 'cluster_number, 'consensus_annotation'.<example>cluster_number,consensus_annotation\n1,K07222  K07222, putative flavoprotein involved in K+ transport\n2,K01069  gloB, gloC, HAGH, hydroxyacylglutathione hydrolase [EC:3.1.2.6]\n</example>",
     "download_urls": {
       "data": [
