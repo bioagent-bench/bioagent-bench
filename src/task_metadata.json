@@ -76,7 +76,7 @@
     "task_id": "deseq",
     "name": "RNA-Seq Differential Expression (DESeq2)",
     "description": "The dataset consists of RNA-Seq samples from Candida parapsilosis wild-type (WT) strains grown in planktonic and biofilm conditions, generated as part of a study on gene expression and biofilm formation. The samples were sequenced on the Illumina HiSeq 2000 platform. The goal of this analysis is to perform differential expression analysis using DESeq2 to identify genes that are significantly up- or down-regulated between planktonic and biofilm conditions, providing insights into biofilm-associated transcriptional changes.",
-    "task_prompt": "Identify differentialy expressed genes between planktonic and biofilm conditions of Candida parapsilosis. The output should be a CSV file with the following columns.",
+    "task_prompt": "Identify differentialy expressed genes between planktonic and biofilm conditions of Candida parapsilosis. The output should be a CSV file with the following columns: gene_id,log2FoldChange,pvalue,padj\nCPAR2_00000,1.0, 2.0, 1e-44",
     "download_urls": {
       "data": [
         {
