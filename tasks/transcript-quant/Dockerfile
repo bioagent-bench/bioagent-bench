@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 RUN mkdir -p /app/data
-RUN wget -O /app/data/data.tar.gz "https://osf.io/download/684fefc97139f9f5536df7a8/"
+RUN wget -O /app/data/data.tar.gz "https://osf.io/download/68b2141b8f0cf7d351f99175/"
 
 RUN cd /app/data && tar -xzf data.tar.gz && rm data.tar.gz
 
