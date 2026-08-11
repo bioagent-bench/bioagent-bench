@@ -3,6 +3,16 @@
 # bioagent-bench
 Benchmark for evaluating LLM agents in bioinformatics
 
+## License
+
+Except where otherwise noted, the original contents of this repository are
+licensed under the [Creative Commons Attribution 4.0 International License](LICENSE).
+When reusing them, please attribute **BioAgent Bench contributors**, link to this
+repository, and indicate whether you made changes.
+
+Third-party datasets and other materials referenced or downloaded by this
+project remain subject to their original owners' terms and licenses.
+
 # Contents
 
 - **src/**
